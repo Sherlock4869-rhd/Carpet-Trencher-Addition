@@ -4,6 +4,17 @@
 
 ---
 
+## Explosion Ray Initial Strength (explosionRayInit)
+
+&emsp;Fixed multiplier for explosion ray initial strength. Range: 0 to 16 (vanilla default is a random value between 0.7 and 1.3). Set to any value outside this range to use vanilla behavior
+
+&emsp;- Type: `double`
+
+&emsp;- Default: `-1.0`
+
+&emsp;- Category: `CTA`, `FEATURE`
+
+
 ## Disable Amethyst Bud Growth in Water (`disableAmethystWaterGrowth`)
 
 Prevents amethyst buds from growing into full water blocks.

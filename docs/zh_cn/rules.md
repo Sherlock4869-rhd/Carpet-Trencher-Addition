@@ -14,6 +14,18 @@
 
 &emsp;- 分类: `CTA`, `FEATURE`
 
+
+## 爆炸射线初始强度 (explosionRayInit)
+
+&emsp;固定设置爆炸射线初始强度倍率。取值范围 0 到 16（原版为 0.7 到 1.3 之间的随机值），设为其他值则使用原版随机行为
+
+&emsp;- 类型: `double`
+
+&emsp;- 默认值: `-1.0`
+
+&emsp;- 分类: `CTA`, `FEATURE`
+
+
 ## 防止极端初始动量TNT生成 (preventExtremeTntMomentum)
 
 &emsp;防止TNT生成时初始动量为能够使其卡入方块碰撞箱的值
