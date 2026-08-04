@@ -26,4 +26,9 @@ public class CarpetTrencherAdditionSettings {
             categories = {CTA, FEATURE}
     )
     public static boolean waterWallLavaProtection = false;
+
+    @Rule(
+            categories = {CTA, FEATURE}
+    )
+    public static double explosionRayInit = -1;
 }

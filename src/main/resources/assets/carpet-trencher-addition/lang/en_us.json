@@ -11,5 +11,8 @@
   "carpet.rule.disableAmethystWaterGrowth.desc": "Prevents amethyst buds from growing into water",
 
   "carpet.rule.waterWallLavaProtection.name": "Water Wall Lava Protection",
-  "carpet.rule.waterWallLavaProtection.desc": "Prevents lava from generating cobblestone/obsidian when the full face of a waterlogged stone stair is directly above it"
+  "carpet.rule.waterWallLavaProtection.desc": "Prevents lava from generating cobblestone/obsidian when the full face of a waterlogged stone stair is directly above it",
+
+  "carpet.rule.explosionRayInit.name": "Set Explosion Ray Initial Value",
+  "carpet.rule.explosionRayInit.desc": "Fixed multiplier for explosion ray initial strength. Range: 0 to 16 (vanilla default is a random value between 0.7 and 1.3). Set to any value outside this range to use vanilla behavior"
 }

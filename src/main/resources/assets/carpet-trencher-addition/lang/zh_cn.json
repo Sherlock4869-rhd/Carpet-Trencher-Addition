@@ -5,11 +5,14 @@
   "carpet.rule.preventExtremeTntMomentum.desc": "防止TNT生成时初始动量为能够使其卡入方块碰撞箱的值",
 
   "carpet.rule.tntInitialXVelocity.name": "设置TNT初速度x分量",
-  "carpet.rule.tntInitialXVelocity.desc": "设置TNT的x方向初速度，取值在-0.02到0.02之间，设为-1即为原版默认情况",
+  "carpet.rule.tntInitialXVelocity.desc": "设置TNT的x方向初速度，取值在-0.02到0.02之间，设为其余值即为原版默认情况",
 
   "carpet.rule.disableAmethystWaterGrowth.name": "禁止紫水晶芽在水中生长",
   "carpet.rule.disableAmethystWaterGrowth.desc": "阻止紫水晶芽长入满格的水中",
 
   "carpet.rule.waterWallLavaProtection.name": "水墙防岩浆",
-  "carpet.rule.waterWallLavaProtection.desc": "防止岩浆上方为含水石头楼梯完整面时生成圆石/黑曜石"
+  "carpet.rule.waterWallLavaProtection.desc": "防止岩浆上方为含水石头楼梯完整面时生成圆石/黑曜石",
+
+  "carpet.rule.explosionRayInit.name": "设定爆炸射线初值",
+  "carpet.rule.explosionRayInit.desc": "固定设置爆炸射线初始强度随机乘数，范围为0到16之间(原版默认为0.7到1.3之间的随机值)，设为其余值即为原版默认情况"
 }
