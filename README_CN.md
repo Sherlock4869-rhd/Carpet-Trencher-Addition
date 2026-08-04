@@ -6,6 +6,8 @@
 
 依赖carpet与fabric API作为前置。
 
+游戏内输入`/carpet list CTA`即可查看所有功能。
+
 ## 文档
 
 - [规则](docs/zh_cn/rules.md)
