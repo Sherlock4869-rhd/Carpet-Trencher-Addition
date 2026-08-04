@@ -1,0 +1,15 @@
+{
+  "carpet.category.CTA": "CTA",
+
+  "carpet.rule.preventExtremeTntMomentum.name": "Prevent extreme TNT initial momentum generation",
+  "carpet.rule.preventExtremeTntMomentum.desc": "Prevents TNT from generating initial momentum values that can cause collision issues",
+
+  "carpet.rule.tntInitialXVelocity.name": "Set TNT initial X velocity",
+  "carpet.rule.tntInitialXVelocity.desc": "Sets TNT initial X velocity component, -1 for vanilla",
+
+  "carpet.rule.disableAmethystWaterGrowth.name": "Disable amethyst bud growth in water",
+  "carpet.rule.disableAmethystWaterGrowth.desc": "Prevents amethyst buds from growing into water",
+
+  "carpet.rule.waterWallLavaProtection.name": "Water Wall Lava Protection",
+  "carpet.rule.waterWallLavaProtection.desc": "Prevents lava from generating cobblestone/obsidian when the full face of a waterlogged stone stair is directly above it"
+}

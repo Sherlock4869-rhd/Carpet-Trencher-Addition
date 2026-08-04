@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "carpet-trencher-addition",
+	"version": "${version}",
+
+	"name": "[CTA] Carpet Trencher Addition",
+	"description": "A Carpet addition designed to help players use trenchers by providing some not vanilla rules.",
+	"authors": [
+		"Sherlock4869_rhd"
+	],
+
+	"contact": {
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+
+	"license": "MIT",
+
+	"icon": "assets/carpet-trencher-addition/icon.png",
+
+	"environment": "*",
+
+	"entrypoints": {
+		"main": [
+			"com.carpet.trencher.addition.utils.CarpetTrencherAdditionMod"
+		]
+	},
+
+	"mixins": [
+		"carpet-trencher-addition.mixins.json"
+	],
+
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21.10",
+		"fabric-api": "*",
+		"carpet": "*",
+		"java": ">=21"
+	}
+}
