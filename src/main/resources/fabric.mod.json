@@ -10,7 +10,9 @@
 	],
 
 	"contact": {
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/Sherlock4869-rhd/Carpet-Trencher-Addition",
+		"sources": "https://github.com/Sherlock4869-rhd/Carpet-Trencher-Addition",
+		"issues": "https://github.com/Sherlock4869-rhd/Carpet-Trencher-Addition/issues"
 	},
 
 	"license": "MIT",
