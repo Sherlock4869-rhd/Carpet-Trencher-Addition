@@ -33,8 +33,6 @@ public class PrimeTntMixin {
                 z = 0;
         }
 
-        tnt.setDeltaMovement(x, y, z);
-
         if (!CarpetTrencherAdditionSettings.preventExtremeTntMomentum) {
 
             double customX = CarpetTrencherAdditionSettings.tntInitialXVelocity;
