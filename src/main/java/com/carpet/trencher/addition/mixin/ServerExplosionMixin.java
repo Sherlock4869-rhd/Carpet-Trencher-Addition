@@ -3,6 +3,7 @@ package com.carpet.trencher.addition.mixin;
 import com.carpet.trencher.addition.utils.CarpetTrencherAdditionSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,17 +31,19 @@ public abstract class ServerExplosionMixin {
     @Shadow @Final private ExplosionDamageCalculator damageCalculator;
 
     /**
-     * 在方法入口拦截，如果规则启用则执行自定义逻辑并提前返回。
+     * 拦截 calculateExplodedPositions 方法入口。
+     * 如果 explosionRayInit >= 0，则执行自定义逻辑，固定射线初始强度；
+     * 否则放行，使用原版随机行为。
      */
     @Inject(method = "calculateExplodedPositions", at = @At("HEAD"), cancellable = true)
     private void onCalculateExplodedPositions(CallbackInfoReturnable<List<BlockPos>> cir) {
         double value = CarpetTrencherAdditionSettings.explosionRayInit;
-        if (value < 0 || value > 16) {
-            // 使用原版随机，放行
+        if (value < 0) {
+            // 放行，使用原版
             return;
         }
 
-        // ========== 自定义爆炸计算逻辑（复制自原版，仅修改 h 的计算） ==========
+        // ---------- 自定义爆炸计算（复制自原版，仅修改 h 的计算） ----------
         Set<BlockPos> set = new HashSet<>();
 
         for (int j = 0; j < 16; j++) {
@@ -55,9 +58,9 @@ public abstract class ServerExplosionMixin {
                         e /= g;
                         f /= g;
 
-                        // ========== 核心修改：使用固定倍率 ==========
+                        // ========== 核心修改：固定射线初始强度 ==========
                         float h = this.radius * (float) value;
-                        // ==========================================
+                        // ===============================================
 
                         double m = this.center.x;
                         double n = this.center.y;
@@ -71,14 +74,17 @@ public abstract class ServerExplosionMixin {
                                 break;
                             }
 
+                            // 安全向上转型为 Explosion
+                            Explosion explosion = (Explosion) this;
+
                             Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(
-                                    (ServerExplosion) (Object) this, this.level, blockPos, blockState, fluidState);
+                                    explosion, this.level, blockPos, blockState, fluidState);
                             if (optional.isPresent()) {
                                 h -= (optional.get() + 0.3F) * 0.3F;
                             }
 
                             if (h > 0.0F && this.damageCalculator.shouldBlockExplode(
-                                    (ServerExplosion) (Object) this, this.level, blockPos, blockState, h)) {
+                                    explosion, this.level, blockPos, blockState, h)) {
                                 set.add(blockPos);
                             }
 
