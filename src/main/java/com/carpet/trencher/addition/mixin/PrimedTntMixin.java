@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(PrimedTnt.class)
-public class PrimeTntMixin {
+public class PrimedTntMixin {
 
     @Unique
     private static final double minMomentum1 = 0.00505050505050505;

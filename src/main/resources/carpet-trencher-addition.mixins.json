@@ -3,7 +3,7 @@
 	"package": "com.carpet.trencher.addition.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"PrimeTntMixin",
+      "PrimedTntMixin",
 		"BuddingAmethystMixin",
 		"LiquidBlockMixin"
 	],
