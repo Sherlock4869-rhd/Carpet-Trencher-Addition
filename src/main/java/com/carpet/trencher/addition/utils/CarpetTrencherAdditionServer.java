@@ -18,7 +18,7 @@ public class CarpetTrencherAdditionServer implements CarpetExtension {
 
     @Override
     public void onGameStarted() {
-        System.out.println("CTA loading settings");
+        CarpetTrencherAdditionMod.LOGGER.info("CTA loading settings");
         CarpetServer.settingsManager.parseSettingsClass(
                 CarpetTrencherAdditionSettings.class
         );
@@ -34,13 +34,12 @@ public class CarpetTrencherAdditionServer implements CarpetExtension {
         String path = "/assets/carpet-trencher-addition/lang/" + lang + ".json";
         try (InputStream in = getClass().getResourceAsStream(path)) {
             if (in != null) {
-                // 指定 UTF-8 解码，避免乱码
                 return GSON.fromJson(new InputStreamReader(in, StandardCharsets.UTF_8), MAP_TYPE);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // 使用日志记录异常，替代 printStackTrace
+            CarpetTrencherAdditionMod.LOGGER.error("Failed to load translation file for {}: {}", lang, e.getMessage(), e);
         }
-        // 若文件缺失，返回空 Map（Carpet 回退英文）
         return new HashMap<>();
     }
 }

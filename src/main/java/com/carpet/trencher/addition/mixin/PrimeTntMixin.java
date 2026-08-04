@@ -3,15 +3,20 @@ package com.carpet.trencher.addition.mixin;
 import com.carpet.trencher.addition.utils.CarpetTrencherAdditionSettings;
 import net.minecraft.world.entity.item.PrimedTnt;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(PrimedTnt.class)
 public class PrimeTntMixin {
 
+    @Unique
     private static final double minMomentum1 = 0.00505050505050505;
+    @Unique
     private static final double maxMomentum1 = 0.005050555555555556;
+    @Unique
     private static final double minMomentum2 = 0.01;
+    @Unique
     private static final double maxMomentum2 = 0.0100001;
 
     @Redirect(
@@ -49,6 +54,7 @@ public class PrimeTntMixin {
         tnt.setDeltaMovement(x, y, z);
     }
 
+    @Unique
     private static boolean isBadMomentum(double value) {
         double abs = Math.abs(value);
 
