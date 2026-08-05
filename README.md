@@ -6,7 +6,7 @@ With the default configuration, it does not affect any vanilla mechanics.
 
 Requires Carpet and Fabric API as dependencies.
 
-Use /carpet list CTA in-game to view all features.
+Use `/carpet list CTA` in-game to view all features.
 
 ## Documentation
 
