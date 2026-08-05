@@ -48,7 +48,7 @@ The value must be between `-0.02` and `0.02`. Set it to `-1` to use the vanilla 
 
 ## Water Wall Lava Protection (`waterWallLavaProtection`)
 
-Prevents cobblestone or obsidian generation when lava comes into contact with the bottom face of a waterlogged stone stair above it.
+Prevents lava from generating cobblestone/obsidian when a waterlogged stone stair (bottom face exposed) is present 1 or 2 blocks above.
 
 - Type: `boolean`
 - Default value: `false`

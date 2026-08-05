@@ -11,7 +11,7 @@
   "carpet.rule.disableAmethystWaterGrowth.desc": "阻止紫水晶芽长入满格的水中",
 
   "carpet.rule.waterWallLavaProtection.name": "水墙防岩浆",
-  "carpet.rule.waterWallLavaProtection.desc": "防止岩浆上方为含水石头楼梯完整面时生成圆石/黑曜石",
+  "carpet.rule.waterWallLavaProtection.desc": "防止岩浆在上方一格或两格内有含水石头楼梯且下表面为完整面时生成圆石或黑曜石",
 
   "carpet.rule.explosionRayInit.name": "设定爆炸射线初值",
   "carpet.rule.explosionRayInit.desc": "固定设置爆炸射线初始强度随机乘数，范围为0到16之间(原版默认为0.7到1.3之间的随机值)，设为其余值即为原版默认情况"

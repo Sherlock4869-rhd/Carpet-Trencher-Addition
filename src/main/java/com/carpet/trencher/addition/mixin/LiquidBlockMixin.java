@@ -10,35 +10,40 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Half;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LiquidBlock.class)
 public class LiquidBlockMixin {
-    @Inject(
-            method = "shouldSpreadLiquid",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private void onShouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
-        // 检查规则是否开启
+
+    @Inject(method = "shouldSpreadLiquid", at = @At("HEAD"), cancellable = true)
+    private void onShouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState,
+                                      CallbackInfoReturnable<Boolean> cir) {
         if (!CarpetTrencherAdditionSettings.waterWallLavaProtection) {
             return;
         }
-        // 只处理岩浆
         if (!blockState.getFluidState().is(FluidTags.LAVA)) {
             return;
         }
 
-        // 检查上方方块
-        BlockPos abovePos = blockPos.above();
-        BlockState aboveState = level.getBlockState(abovePos);
+        // 检查上方1格
+        BlockPos above1 = blockPos.above();
+        BlockState state1 = level.getBlockState(above1);
+        // 检查上方2格
+        BlockPos above2 = above1.above();
+        BlockState state2 = level.getBlockState(above2);
 
-        // 条件：上方为含水石头楼梯，且为完整面朝下
-        if (aboveState.getFluidState().is(FluidTags.WATER) && aboveState.getBlock() == Blocks.STONE_STAIRS && aboveState.getValue(StairBlock.HALF) == Half.BOTTOM) {
+        if (isValidWaterloggedStair(state1) || isValidWaterloggedStair(state2)) {
             cir.setReturnValue(true);
         }
-        // 否则执行原方法（正常生成圆石/黑曜石）
+    }
+
+    @Unique
+    private static boolean isValidWaterloggedStair(BlockState state) {
+        return state.getFluidState().is(FluidTags.WATER) &&
+                state.getBlock() == Blocks.STONE_STAIRS &&
+                state.getValue(StairBlock.HALF) == Half.BOTTOM;
     }
 }
