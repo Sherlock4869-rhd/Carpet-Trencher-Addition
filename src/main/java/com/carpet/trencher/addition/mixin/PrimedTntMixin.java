@@ -28,7 +28,6 @@ public class PrimedTntMixin {
     )
     private void preventExtremeTntMomentum(PrimedTnt tnt, double x, double y, double z) {
         if (CarpetTrencherAdditionSettings.preventExtremeTntMomentum && (isBadMomentum(x) || isBadMomentum(z))) {
-                // 固定改为 X 正方向
                 x = 0.02;
                 z = 0;
         }

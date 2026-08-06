@@ -39,11 +39,9 @@ public abstract class ServerExplosionMixin {
     private void onCalculateExplodedPositions(CallbackInfoReturnable<List<BlockPos>> cir) {
         double value = CarpetTrencherAdditionSettings.explosionRayInit;
         if (value < 0) {
-            // 放行，使用原版
             return;
         }
 
-        // ---------- 自定义爆炸计算（复制自原版，仅修改 h 的计算） ----------
         Set<BlockPos> set = new HashSet<>();
 
         for (int j = 0; j < 16; j++) {
@@ -58,9 +56,8 @@ public abstract class ServerExplosionMixin {
                         e /= g;
                         f /= g;
 
-                        // ========== 核心修改：固定射线初始强度 ==========
+                        //固定射线初始强度
                         float h = this.radius * (float) value;
-                        // ===============================================
 
                         double m = this.center.x;
                         double n = this.center.y;
@@ -74,7 +71,6 @@ public abstract class ServerExplosionMixin {
                                 break;
                             }
 
-                            // 安全向上转型为 Explosion
                             Explosion explosion = (Explosion) this;
 
                             Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(
@@ -98,7 +94,6 @@ public abstract class ServerExplosionMixin {
             }
         }
 
-        // 返回自定义结果，取消原方法执行
         cir.setReturnValue(new ArrayList<>(set));
     }
 }

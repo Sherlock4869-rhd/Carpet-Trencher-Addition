@@ -28,10 +28,9 @@ public class LiquidBlockMixin {
             return;
         }
 
-        // 检查上方1格
         BlockPos above1 = blockPos.above();
         BlockState state1 = level.getBlockState(above1);
-        // 检查上方2格
+
         BlockPos above2 = above1.above();
         BlockState state2 = level.getBlockState(above2);
 

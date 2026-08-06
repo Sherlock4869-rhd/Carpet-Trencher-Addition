@@ -37,7 +37,6 @@ public class CarpetTrencherAdditionServer implements CarpetExtension {
                 return GSON.fromJson(new InputStreamReader(in, StandardCharsets.UTF_8), MAP_TYPE);
             }
         } catch (Exception e) {
-            // 使用日志记录异常，替代 printStackTrace
             CarpetTrencherAdditionMod.LOGGER.error("Failed to load translation file for {}: {}", lang, e.getMessage(), e);
         }
         return new HashMap<>();
