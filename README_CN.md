@@ -4,7 +4,7 @@
 
 默认配置下，不会影响任何原版机制。
 
-依赖carpet与fabric API作为前置。
+依赖Carpet作为前置。
 
 游戏内输入`/carpet list CTA`即可查看所有功能。
 

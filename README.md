@@ -4,7 +4,7 @@ This is a Carpet extension created to make operating trenchers easier. It adds s
 
 With the default configuration, it does not affect any vanilla mechanics.
 
-Requires Carpet and Fabric API as dependencies.
+Requires Carpet as dependencies.
 
 Use `/carpet list CTA` in-game to view all features.
 
