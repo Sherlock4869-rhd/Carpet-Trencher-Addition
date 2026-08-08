@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BuddingAmethystBlock.class)
-public class BuddingAmethystMixin {
+public abstract class BuddingAmethystMixin {
     @Inject(
             method = "canClusterGrowAtState",
             at = @At("HEAD"),

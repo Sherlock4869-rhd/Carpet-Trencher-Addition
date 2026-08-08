@@ -25,17 +25,27 @@ import java.util.Set;
 @Mixin(ServerExplosion.class)
 public abstract class ServerExplosionMixin {
 
-    @Shadow @Final private float radius;
-    @Shadow @Final private ServerLevel level;
-    @Shadow @Final private Vec3 center;
-    @Shadow @Final private ExplosionDamageCalculator damageCalculator;
+    @Shadow
+    @Final
+    private float radius;
 
-    /**
-     * 拦截 calculateExplodedPositions 方法入口。
-     * 如果 explosionRayInit >= 0，则执行自定义逻辑，固定射线初始强度；
-     * 否则放行，使用原版随机行为。
-     */
-    @Inject(method = "calculateExplodedPositions", at = @At("HEAD"), cancellable = true)
+    @Shadow
+    @Final
+    private ServerLevel level;
+    @Shadow
+    @Final
+    private Vec3 center;
+    @Shadow
+    @Final
+    private ExplosionDamageCalculator damageCalculator;
+
+    //? if >= 1.21.2 {
+    @Inject(
+            method = "calculateExplodedPositions",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+
     private void onCalculateExplodedPositions(CallbackInfoReturnable<List<BlockPos>> cir) {
         double value = CarpetTrencherAdditionSettings.explosionRayInit;
         if (value < 0) {
@@ -56,7 +66,6 @@ public abstract class ServerExplosionMixin {
                         e /= g;
                         f /= g;
 
-                        //固定射线初始强度
                         float h = this.radius * (float) value;
 
                         double m = this.center.x;
