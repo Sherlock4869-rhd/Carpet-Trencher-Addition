@@ -25,21 +25,11 @@ import java.util.Set;
 @Mixin(ServerExplosion.class)
 public abstract class ServerExplosionMixin {
 
-    @Shadow
-    @Final
-    private float radius;
+    @Shadow @Final private float radius;
+    @Shadow @Final private ServerLevel level;
+    @Shadow @Final private Vec3 center;
+    @Shadow @Final private ExplosionDamageCalculator damageCalculator;
 
-    @Shadow
-    @Final
-    private ServerLevel level;
-    @Shadow
-    @Final
-    private Vec3 center;
-    @Shadow
-    @Final
-    private ExplosionDamageCalculator damageCalculator;
-
-    //? if >= 1.21.2 {
     @Inject(
             method = "calculateExplodedPositions",
             at = @At("HEAD"),
