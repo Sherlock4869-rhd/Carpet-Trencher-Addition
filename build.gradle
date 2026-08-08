@@ -70,16 +70,3 @@ tasks.named("remapSourcesJar") {
 	archiveBaseName = "carpet-trencher-addition"
 	archiveVersion = "${project.version}+mc${stonecutter.current.version}"
 }
-
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			from components.java
-		}
-	}
-
-
-	repositories {
-
-	}
-}
