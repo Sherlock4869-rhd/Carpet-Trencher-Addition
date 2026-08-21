@@ -1,4 +1,4 @@
-package com.carpet.trencher.addition.utils;
+package com.carpet.trencher.addition;
 
 import carpet.api.settings.Rule;
 import static carpet.api.settings.RuleCategory.*;

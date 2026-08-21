@@ -1,6 +1,6 @@
 package com.carpet.trencher.addition.mixin;
 
-import com.carpet.trencher.addition.utils.CarpetTrencherAdditionSettings;
+import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
@@ -17,9 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LiquidBlock.class)
 public abstract class LiquidBlockMixin {
 
-    @Inject(method = "shouldSpreadLiquid", at = @At("HEAD"), cancellable = true)
-    private void onShouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState,
-                                      CallbackInfoReturnable<Boolean> cir) {
+    @Inject(
+            method = "shouldSpreadLiquid",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void onShouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
         if (!CarpetTrencherAdditionSettings.waterWallLavaProtection) {
             return;
         }
@@ -27,23 +30,15 @@ public abstract class LiquidBlockMixin {
             return;
         }
 
-        BlockPos above1 = blockPos.above();
-        BlockState state1 = level.getBlockState(above1);
-
-        BlockPos above2 = above1.above();
-        BlockState state2 = level.getBlockState(above2);
-
-        if (isValidWaterloggedStair(state1) || isValidWaterloggedStair(state2)) {
+        if (isValidWaterloggedStair(level.getBlockState(blockPos.above())) || isValidWaterloggedStair(level.getBlockState(blockPos.above(2)))) {
             cir.setReturnValue(true);
         }
     }
 
     @Unique
     private static boolean isValidWaterloggedStair(BlockState state) {
-        if (!(state.getBlock() instanceof StairBlock)) {
-            return false;
-        }
-        return state.getFluidState().is(FluidTags.WATER) &&
-                state.getValue(StairBlock.HALF) == Half.BOTTOM;
+        return state.getBlock() instanceof StairBlock
+                && state.getValue(StairBlock.HALF) == Half.BOTTOM
+                && state.getFluidState().is(FluidTags.WATER);
     }
 }

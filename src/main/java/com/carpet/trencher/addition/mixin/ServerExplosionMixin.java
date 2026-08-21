@@ -1,11 +1,10 @@
 package com.carpet.trencher.addition.mixin;
 
-import com.carpet.trencher.addition.utils.CarpetTrencherAdditionSettings;
+import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
-import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
@@ -22,6 +21,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+//? if >= 1.21.2 {
+import net.minecraft.world.level.ServerExplosion;
+//? } else {
+/*
+import net.minecraft.util.RandomSource;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+*/
+//? }
+
+//? if >= 1.21.2 {
 @Mixin(ServerExplosion.class)
 public abstract class ServerExplosionMixin {
 
@@ -43,6 +53,7 @@ public abstract class ServerExplosionMixin {
         }
 
         Set<BlockPos> set = new HashSet<>();
+        float energy = this.radius * (float) value;
 
         for (int j = 0; j < 16; j++) {
             for (int k = 0; k < 16; k++) {
@@ -56,7 +67,7 @@ public abstract class ServerExplosionMixin {
                         e /= g;
                         f /= g;
 
-                        float h = this.radius * (float) value;
+                        float h = energy;
 
                         double m = this.center.x;
                         double n = this.center.y;
@@ -72,14 +83,12 @@ public abstract class ServerExplosionMixin {
 
                             Explosion explosion = (Explosion) this;
 
-                            Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(
-                                    explosion, this.level, blockPos, blockState, fluidState);
+                            Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(explosion, this.level, blockPos, blockState, fluidState);
                             if (optional.isPresent()) {
                                 h -= (optional.get() + 0.3F) * 0.3F;
                             }
 
-                            if (h > 0.0F && this.damageCalculator.shouldBlockExplode(
-                                    explosion, this.level, blockPos, blockState, h)) {
+                            if (h > 0.0F && this.damageCalculator.shouldBlockExplode(explosion, this.level, blockPos, blockState, h)) {
                                 set.add(blockPos);
                             }
 
@@ -92,7 +101,28 @@ public abstract class ServerExplosionMixin {
                 }
             }
         }
-
         cir.setReturnValue(new ArrayList<>(set));
     }
 }
+//? } else {
+/*
+@Mixin(Explosion.class)
+public class ServerExplosionMixin {
+    @WrapOperation(
+            method = "explode",
+            at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/RandomSource;nextFloat()F",
+            ordinal = 0
+            )
+    )
+    private float onExplode(RandomSource random,Operation<Float> original) {
+        double value = CarpetTrencherAdditionSettings.explosionRayInit;
+        if (value < 0 || value > 50) {
+            return original.call(random);
+        }
+        return (float) ((value - 0.7) / 0.6);
+    }
+}
+*/
+//? }

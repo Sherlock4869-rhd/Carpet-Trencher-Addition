@@ -23,17 +23,25 @@
 
 	"entrypoints": {
 		"main": [
-			"com.carpet.trencher.addition.utils.CarpetTrencherAdditionMod"
+			"com.carpet.trencher.addition.CarpetTrencherAdditionMod"
+		],
+		"client": [
+			"com.carpet.trencher.addition.CarpetTrencherAdditionClient"
 		]
 	},
 
 	"mixins": [
-		"carpet-trencher-addition.mixins.json"
+		"carpet-trencher-addition.mixins.json",
+		{
+			"config": "carpet-trencher-addition.client.mixins.json",
+			"environment": "client"
+		}
 	],
 
 	"depends": {
 		"fabricloader": ">=0.16.0",
 		"minecraft": "${minecraftVer}",
+		"fabric-api": "*",
 		"carpet": "*"
 	}
 }

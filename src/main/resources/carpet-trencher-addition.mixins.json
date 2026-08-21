@@ -3,10 +3,12 @@
 	"package": "com.carpet.trencher.addition.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-      "PrimedTntMixin",
+		"PrimedTntMixin",
 		"BuddingAmethystMixin",
 		"LiquidBlockMixin",
-		"ServerExplosionMixin"
+		"ServerExplosionMixin",
+		"EntityMixin",
+		"ServerLevelMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

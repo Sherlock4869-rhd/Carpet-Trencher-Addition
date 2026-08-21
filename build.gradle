@@ -57,9 +57,11 @@ dependencies {
 		mappings loom.officialMojangMappings()
 		modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 		modImplementation "carpet:fabric-carpet:${carpet_core_version}"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 	} else {
 		implementation "net.fabricmc:fabric-loader:${loader_version}"
 		implementation "carpet:fabric-carpet:${property("carpet_core_version")}"
+		implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 	}
 }
 

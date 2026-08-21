@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.carpet.trencher.addition.client.mixin",
+	"package": "com.carpet.trencher.addition.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"client": [
-		"ExampleClientMixin"
+	"mixins": [
+		"LevelRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

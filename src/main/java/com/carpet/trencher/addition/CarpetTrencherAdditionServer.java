@@ -1,9 +1,16 @@
-package com.carpet.trencher.addition.utils;
+package com.carpet.trencher.addition;
 
 import carpet.CarpetExtension;
 import carpet.CarpetServer;
+import com.carpet.trencher.addition.commands.CTACommand;
+import com.carpet.trencher.addition.commands.track.TrackManager;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
@@ -26,7 +33,7 @@ public class CarpetTrencherAdditionServer implements CarpetExtension {
 
     @Override
     public String version() {
-        return "1.0.0";
+        return "CTA";
     }
 
     @Override
@@ -41,4 +48,16 @@ public class CarpetTrencherAdditionServer implements CarpetExtension {
         }
         return new HashMap<>();
     }
+
+    @Override
+    public void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext
+    ) {
+        CTACommand.register(dispatcher);
+    }
+
+    @Override
+    public void onPlayerLoggedOut(ServerPlayer player) {
+        TrackManager.onPlayerLoggedOut(player);
+    }
+
 }

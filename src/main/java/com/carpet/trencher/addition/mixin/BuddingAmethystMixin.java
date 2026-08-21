@@ -1,6 +1,6 @@
 package com.carpet.trencher.addition.mixin;
 
-import com.carpet.trencher.addition.utils.CarpetTrencherAdditionSettings;
+import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BuddingAmethystBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,8 +16,9 @@ public abstract class BuddingAmethystMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private static void disableWaterGrowth(BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
-        if ( CarpetTrencherAdditionSettings.disableAmethystWaterGrowth && blockState.is(Blocks.WATER)) {
+    private static void onCanClusterGrowAtState(BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
+        if (CarpetTrencherAdditionSettings.disableAmethystWaterGrowth
+                && blockState.is(Blocks.WATER)) {
             cir.setReturnValue(false);
         }
     }
