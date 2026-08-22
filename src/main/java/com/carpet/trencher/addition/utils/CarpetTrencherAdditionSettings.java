@@ -28,6 +28,8 @@ public class CarpetTrencherAdditionSettings {
     public static boolean waterWallLavaProtection = false;
 
     @Rule(
+            options = {"-1", "0.7", "1.3"},
+            strict = false,
             categories = {CTA, FEATURE}
     )
     public static double explosionRayInit = -1;

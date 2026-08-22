@@ -38,7 +38,7 @@ public abstract class ServerExplosionMixin {
 
     private void onCalculateExplodedPositions(CallbackInfoReturnable<List<BlockPos>> cir) {
         double value = CarpetTrencherAdditionSettings.explosionRayInit;
-        if (value < 0) {
+        if (value < 0 || value > 50) {
             return;
         }
 

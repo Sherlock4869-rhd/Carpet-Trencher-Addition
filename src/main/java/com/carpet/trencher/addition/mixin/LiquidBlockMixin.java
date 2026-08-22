@@ -40,6 +40,9 @@ public abstract class LiquidBlockMixin {
 
     @Unique
     private static boolean isValidWaterloggedStair(BlockState state) {
+        if (!(state.getBlock() instanceof StairBlock)) {
+            return false;
+        }
         return state.getFluidState().is(FluidTags.WATER) &&
                 state.getValue(StairBlock.HALF) == Half.BOTTOM;
     }

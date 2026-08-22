@@ -1,20 +1,47 @@
+buildscript {
+	repositories {
+		maven {
+			name = "Fabric"
+			url = "https://maven.fabricmc.net/"
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+	dependencies {
+		classpath "net.fabricmc:fabric-loom:1.15.5"
+	}
+}
+
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
+}
+
+def mcVersion = stonecutter.current.version
+def minecraftVer = project.findProperty("minecraft_version") ?: mcVersion
+def isModern = mcVersion.startsWith('26.')
+
+if (isModern) {
+	apply plugin: 'net.fabricmc.fabric-loom'
+} else {
+	apply plugin: 'net.fabricmc.fabric-loom-remap'
 }
 
 version = "${project.mod_version}"
 group = rootProject.maven_group
 
+base {
+	archivesName = "carpet-trencher-addition-${mcVersion}"
+}
+
 repositories {
 	maven {
 		url "https://masa.dy.fi/maven"
 	}
+	mavenCentral()
 }
 
 loom {
 	splitEnvironmentSourceSets()
-
 	mods {
 		"carpet-trencher-addition" {
 			sourceSet sourceSets.main
@@ -24,49 +51,64 @@ loom {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${stonecutter.current.project}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
-	modImplementation "carpet:fabric-carpet:${carpet_core_version}"
+	minecraft "com.mojang:minecraft:${mcVersion}"
+
+	if (!isModern) {
+		mappings loom.officialMojangMappings()
+		modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+		modImplementation "carpet:fabric-carpet:${carpet_core_version}"
+	} else {
+		implementation "net.fabricmc:fabric-loader:${loader_version}"
+		implementation "carpet:fabric-carpet:${property("carpet_core_version")}"
+	}
 }
 
 processResources {
-	def version = project.version
-	def minecraftVer = stonecutter.current.version
-
-	inputs.property "version", version
+	inputs.property "version", project.version
 	inputs.property "minecraftVer", minecraftVer
-
 	filesMatching("fabric.mod.json") {
 		expand(
-				version: version,
+				version: project.version,
 				minecraftVer: minecraftVer
 		)
 	}
 }
 
+def javaVersion = isModern ? 25 : 21
+
 java {
 	withSourcesJar()
+	sourceCompatibility = JavaVersion.toVersion(javaVersion)
+	targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+tasks.withType(JavaCompile).configureEach {
+	options.release = javaVersion
 }
 
 jar {
-	def projectName = project.name
-	inputs.property "projectName", projectName
-
 	from("LICENSE") {
-		rename { "${it}_${projectName}" }
+		rename { "${it}_${project.name}" }
 	}
 }
 
-tasks.named("remapJar") {
+tasks.named("jar") {
 	archiveBaseName = "carpet-trencher-addition"
-	archiveVersion = "${project.version}+mc${stonecutter.current.version}"
+	archiveVersion = "${project.version}+mc${project.findProperty("game_version")}"
 }
 
-tasks.named("remapSourcesJar") {
+tasks.named("sourcesJar") {
 	archiveBaseName = "carpet-trencher-addition"
-	archiveVersion = "${project.version}+mc${stonecutter.current.version}"
+	archiveVersion = "${project.version}+mc${project.findProperty("game_version")}"
+}
+
+if (!isModern) {
+	tasks.named("remapJar") {
+		archiveBaseName = "carpet-trencher-addition"
+		archiveVersion = "${project.version}+mc${project.findProperty("game_version")}"
+	}
+	tasks.named("remapSourcesJar") {
+		archiveBaseName = "carpet-trencher-addition"
+		archiveVersion = "${project.version}+mc${project.findProperty("game_version")}"
+	}
 }
