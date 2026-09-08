@@ -1,5 +1,7 @@
 # 功能介绍
 
+---
+
 ## 规则
 
 **提示：可以使用 `Ctrl+F` 快速查找自己想要的规则**
@@ -14,6 +16,7 @@
 
 &emsp;- 分类: `CTA`, `FEATURE`
 
+---
 
 ### 爆炸射线初始强度 (explosionRayInit)
 
@@ -36,6 +39,7 @@
 
 &emsp;- 分类: `CTA`, `FEATURE`
 
+---
 
 ### 设置TNT初速度x分量 (tntInitialXVelocity)
 
@@ -47,8 +51,9 @@
 
 &emsp;- 分类: `CTA`, `FEATURE`
 
-### 水墙防岩浆 (waterWallLavaProtection)
+---
 
+### 水墙防岩浆 (waterWallLavaProtection)
 
 &emsp;防止岩浆在上方一格或两格内有含水楼梯且下表面为完整面时生成圆石或黑曜石
 
@@ -57,6 +62,8 @@
 &emsp;- 默认值: `false`
 
 &emsp;- 分类: `CTA`, `FEATURE`
+
+---
 
 ## 信息显示
 
