@@ -10,4 +10,4 @@
 
 ## 文档
 
-- [规则](docs/zh_cn/rules.md)
+- [功能介绍](docs/zh_cn/intro)
