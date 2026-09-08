@@ -10,4 +10,4 @@
 
 ## 文档
 
-- [功能介绍](docs/zh_cn/intro)
+- [功能介绍](docs/zh_cn/intro.md)

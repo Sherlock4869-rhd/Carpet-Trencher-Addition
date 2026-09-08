@@ -10,4 +10,4 @@ Use `/carpet list CTA` in-game to view all features.
 
 ## Documentation
 
-- [Introduction](docs/en_us/intro)
+- [Introduction](docs/en_us/intro.md)
