@@ -61,7 +61,7 @@ Prevents lava from generating cobblestone/obsidian when a waterlogged stair (bot
 
 Use `/cta track <entity>` to track an entity. Information such as the entity's position and velocity will be displayed on the left side of the screen. The command uses the same entity selectors as vanilla Minecraft commands. For example, to track all TNT entities, use:`/cta track @e[type=minecraft:tnt]`
 
-Use `/cta track list` to view the list of all tracked entities.
+Use `/cta track list` to view the list of tracked entities.
 
 Use `/cta track clear` to clear the tracking list.
 

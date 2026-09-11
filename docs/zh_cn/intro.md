@@ -70,7 +70,7 @@
 
 使用 `/cta track <实体>` 来追踪实体，实体的位置速度等信息将显示在屏幕左侧，采用原版指令的实体选择器，如追踪所有实体中的TNT的指令为 `/cta track @e[type=minecraft:tnt]`。
 
-使用`/cta track list`查看所有追踪列表；
+使用`/cta track list`查看追踪实体列表；
 
 使用`/cta track clear`清空追踪列表；
 
