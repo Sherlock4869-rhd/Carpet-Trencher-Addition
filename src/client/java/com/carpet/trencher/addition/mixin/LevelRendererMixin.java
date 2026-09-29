@@ -50,7 +50,7 @@ public abstract class LevelRendererMixin {
             method = "extractRenderState",
             at = @At("TAIL")
     )
-    private void setTrackColor(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
+    private void setTrackedEntityOutline(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
         UUID entityUuid = entity.getUUID();
         if (ClientTrackManager.isTracked(entityUuid)) {
             state.outlineColor = ClientTrackManager.entitiesColor.get(entityUuid);

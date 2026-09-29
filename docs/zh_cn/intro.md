@@ -26,7 +26,19 @@
 
 &emsp;- 默认值: `-1.0`
 
-&emsp;- 分类: `CTA`, `FEATURE`
+&emsp;- 分类: `CTA`, `FEATURE`, `TNT`
+
+---
+
+### 优化爆炸推进实体 (optimizedTntPushEntity)
+
+&emsp;优化爆炸对大量重叠TNT以及生物实体的计算
+
+&emsp;- 类型: `boolean`
+
+&emsp;- 默认值: `false`
+
+&emsp;- 分类: `CTA`, `TNT`, `OPTIMIZATION`
 
 ---
 
@@ -38,7 +50,7 @@
 
 &emsp;- 默认值: `false`
 
-&emsp;- 分类: `CTA`, `FEATURE`
+&emsp;- 分类: `CTA`, `FEATURE`, `TNT`
 
 ---
 
@@ -50,7 +62,7 @@
 
 &emsp;- 默认值: `-1.0`
 
-&emsp;- 分类: `CTA`, `FEATURE`
+&emsp;- 分类: `CTA`, `FEATURE`, `TNT`
 
 ---
 
@@ -62,7 +74,7 @@
 
 &emsp;- 默认值: `false`
 
-&emsp;- 分类: `CTA`, `FEATURE`
+&emsp;- 分类: `CTA`, `FEATURE`, `TNT`
 
 ---
 

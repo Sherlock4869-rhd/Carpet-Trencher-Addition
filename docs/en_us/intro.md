@@ -26,6 +26,18 @@ Prevents amethyst buds from growing into full water blocks.
 
 ---
 
+### Optimize Explosion Entity Pushing (optimizedTntPushEntity)
+
+Optimizes explosion calculations for large numbers of overlapping TNT and living entities
+
+- Type: `boolean`
+
+- Default: `false`
+
+- Categories: `CTA`, `TNT`, `OPTIMIZATION`
+
+---
+
 ### Prevent Extreme Initial TNT Momentum (`preventExtremeTntMomentum`)
 
 Prevents TNT from generating with initial momentum values that can cause it to become stuck inside block collision boxes.

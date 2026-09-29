@@ -8,12 +8,12 @@ public class CarpetTrencherAdditionSettings {
     public static final String CTA = "CTA";
 
     @Rule(
-            categories = {CTA, FEATURE}
+            categories = {CTA, FEATURE, TNT}
     )
     public static boolean preventExtremeTntMomentum = false;
 
     @Rule(
-            categories = {CTA, FEATURE}
+            categories = {CTA, FEATURE, TNT}
     )
     public static double tntInitialXVelocity = -1;
 
@@ -30,7 +30,12 @@ public class CarpetTrencherAdditionSettings {
     @Rule(
             options = {"-1", "0.7", "1.3"},
             strict = false,
-            categories = {CTA, FEATURE}
+            categories = {CTA, FEATURE, TNT}
     )
     public static double explosionRayInit = -1;
+
+    @Rule(
+            categories = {CTA, TNT, OPTIMIZATION}
+    )
+    public static boolean optimizedTntPushEntity = false;
 }
