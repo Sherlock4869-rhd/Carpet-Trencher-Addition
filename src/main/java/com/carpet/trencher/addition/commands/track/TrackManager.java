@@ -33,6 +33,7 @@ public class TrackManager {
                         .add(trackerUuid);
                 ((TrackableEntity) entity).cta$setTracked(true);
                 addedEntities.add(entityUuid);
+                updateTracking(entity);
             }
             sendTrackOrderAdd(tracker, addedEntities);
         });

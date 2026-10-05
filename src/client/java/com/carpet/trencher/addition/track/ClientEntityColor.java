@@ -63,9 +63,6 @@ public class ClientEntityColor {
         int green = Math.round((g + m) * 255.0F);
         int blue = Math.round((b + m) * 255.0F);
 
-        return 0xFF000000
-                | (red << 16)
-                | (green << 8)
-                | blue;
+        return 0xFF000000 | (red << 16) | (green << 8) | blue;
     }
 }

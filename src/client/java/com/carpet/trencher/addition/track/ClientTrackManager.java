@@ -75,7 +75,6 @@ public class ClientTrackManager {
     //? } else {
     /*
     public static Entity getEntity(int entityId) {
-
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null) {
             return null;

@@ -44,6 +44,14 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 */
 //? }
 
+//? if <= 1.21.10 {
+import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
+//? } else {
+/*
+import net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.AbstractWindCharge;
+*/
+//? }
+
 //? if <= 1.21.1 {
 /*
 @Mixin(Explosion.class)
@@ -79,6 +87,7 @@ public abstract class ServerExplosionMixin {
             cancellable = true
     )
     private void onCalculateExplodedPositions(CallbackInfoReturnable<List<BlockPos>> cir) {
+
         double value = CarpetTrencherAdditionSettings.explosionRayInit;
         if (value < 0 || value > 50) {
             return;
@@ -91,16 +100,17 @@ public abstract class ServerExplosionMixin {
             for (int k = 0; k < 16; k++) {
                 for (int l = 0; l < 16; l++) {
                     if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
+
                         double d = j / 15.0F * 2.0F - 1.0F;
                         double e = k / 15.0F * 2.0F - 1.0F;
                         double f = l / 15.0F * 2.0F - 1.0F;
                         double g = Math.sqrt(d * d + e * e + f * f);
+
                         d /= g;
                         e /= g;
                         f /= g;
 
                         float h = energy;
-
                         double m = this.center.x;
                         double n = this.center.y;
                         double o = this.center.z;
@@ -128,6 +138,7 @@ public abstract class ServerExplosionMixin {
                             n += e * 0.3F;
                             o += f * 0.3F;
                             h -= 0.22500001F;
+
                         }
                     }
                 }
@@ -201,6 +212,7 @@ public abstract class ServerExplosionMixin {
         int z1 = Mth.floor(center.z + radius + 1.0);
 
         TntPushCache tntPushCache = new TntPushCache();
+        TntPushCache windChargePushCache = new TntPushCache();
         LivingEntityPushCache livingEntityPushCache = new LivingEntityPushCache();
 
         for (Entity entity : level.getEntities(this.source, new AABB( x0, y0, z0, x1, y1, z1))) {
@@ -215,14 +227,16 @@ public abstract class ServerExplosionMixin {
                 continue;
             }
 
-            if (entity instanceof PrimedTnt tnt) {
-                optimizeTnt(tnt, distance, center, tntPushCache);
-                continue;
-            } else if (entity instanceof LivingEntity livingEntity && !(entity instanceof Player)) {
-                optimizeLivingEntity(livingEntity, distance, center, livingEntityPushCache);
-                continue;
+            switch (entity) {
+                case PrimedTnt tnt ->
+                        optimizeTnt(tnt, distance, center, tntPushCache);
+                case AbstractWindCharge abstractWindCharge ->
+                        optimizeProjectile(abstractWindCharge, distance, center, windChargePushCache);
+                case LivingEntity livingEntity when !(entity instanceof Player) ->
+                        optimizeLivingEntity(livingEntity, distance, center, livingEntityPushCache);
+                default ->
+                        optimizeEntity(entity, distance, center);
             }
-            optimizeEntity(entity, distance, center);
         }
     }
 
@@ -236,18 +250,38 @@ public abstract class ServerExplosionMixin {
         Vec3 position = tnt.position();
         Vec3 push = tntPushCache.get(position);
         if (push == null) {
-
             Vec3 direction = position.subtract(center).normalize();
             float multiplier = this.damageCalculator.getKnockbackMultiplier(tnt);
             float exposure = getSeenPercent(center, tnt);
             double power = (1.0 - distance) * exposure * multiplier;
-
             push = direction.scale(power);
             tntPushCache.put(position, push);
-
         }
         applyKnockback(tnt, push);
         tnt.onExplosionHit(this.source);
+    }
+
+    @Unique
+    private void optimizeProjectile(
+            Projectile projectile,
+            double distance,
+            Vec3 center,
+            TntPushCache windChargePushCache
+    ) {
+        Vec3 position = projectile.position();
+        Vec3 push = windChargePushCache.get(position);
+
+        if (push == null) {
+            Vec3 direction = position.subtract(center).normalize();
+            float multiplier = this.damageCalculator.getKnockbackMultiplier(projectile);
+            float exposure = getSeenPercent(center, projectile);
+            double power = (1.0 - distance) * exposure * multiplier;
+            push = direction.scale(power);
+            windChargePushCache.put(position, push);
+        }
+        applyKnockback(projectile, push);
+        handlePostKnockback(projectile, push);
+        projectile.onExplosionHit(this.source);
     }
 
     @Unique
