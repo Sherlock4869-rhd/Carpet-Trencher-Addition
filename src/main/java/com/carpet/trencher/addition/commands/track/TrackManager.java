@@ -8,8 +8,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.DistanceManager;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
@@ -31,7 +35,7 @@ public class TrackManager {
                 entityTrackers
                         .computeIfAbsent(entityUuid, uuid -> new HashSet<>())
                         .add(trackerUuid);
-                ((TrackableEntity) entity).cta$setTracked(true);
+                ((EntityTrackingAccess) entity).cta$setTracked(true);
                 addedEntities.add(entityUuid);
                 updateTracking(entity);
             }
@@ -207,4 +211,25 @@ public class TrackManager {
             });
         }
     }
+
+    public static boolean isTicking(Entity entity){
+        Level level = entity.level();
+        if(level instanceof ServerLevel serverLevel) {
+            long pos = getChunkPos(entity);
+            DistanceManager manager = serverLevel.getChunkSource().chunkMap.getDistanceManager();
+            return manager.inEntityTickingRange(pos);
+        }
+        else {return true;}
+    }
+
+    public static long getChunkPos(Entity entity) {
+        //? if <= 1.21.11 {
+        return entity.chunkPosition().toLong();
+        //? } else {
+        /*
+        return entity.chunkPosition().pack();
+        */
+        //? }
+    }
+
 }

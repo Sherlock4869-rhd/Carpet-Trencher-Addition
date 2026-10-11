@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.UUID;
+
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin{
 
@@ -54,4 +56,5 @@ public abstract class PrimedTntMixin{
         double abs = Math.abs(value);
         return (abs >= minMomentum1 && abs <= maxMomentum1) || (abs >= minMomentum2 && abs <= maxMomentum2);
     }
+
 }

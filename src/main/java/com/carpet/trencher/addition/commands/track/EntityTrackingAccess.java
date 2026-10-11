@@ -1,9 +1,9 @@
 package com.carpet.trencher.addition.commands.track;
 
-public interface TrackableEntity {
+public interface EntityTrackingAccess {
 
     boolean cta$isTracked();
 
-    void cta$setTracked(boolean cta$tracked);
+    void cta$setTracked(boolean tracked);
 
 }

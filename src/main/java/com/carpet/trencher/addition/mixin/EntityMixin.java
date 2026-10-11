@@ -1,7 +1,7 @@
 package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.commands.track.TrackManager;
-import com.carpet.trencher.addition.commands.track.TrackableEntity;
+import com.carpet.trencher.addition.commands.track.EntityTrackingAccess;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,13 +24,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements TrackableEntity {
+public abstract class EntityMixin implements EntityTrackingAccess {
 
-    @Shadow
-    public abstract UUID getUUID();
+    @Shadow public abstract UUID getUUID();
 
-    @Unique
-    private boolean cta$tracked;
+    @Unique private boolean cta$tracked;
 
     @Override
     public boolean cta$isTracked(){

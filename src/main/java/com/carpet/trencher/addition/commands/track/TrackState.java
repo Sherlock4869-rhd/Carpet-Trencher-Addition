@@ -75,7 +75,8 @@ public final class TrackState {
         //? }
         FUSE(8, ValueType.INT),
         ENABLED(9, ValueType.BOOLEAN),
-        ITEMS(10, ValueType.ITEM_STACK_LIST);
+        ITEMS(10, ValueType.ITEM_STACK_LIST),
+        TICKING(11, ValueType.BOOLEAN);
 
         private final int id;
         private final ValueType valueType;
@@ -142,6 +143,8 @@ public final class TrackState {
                 states.put(Type.ENABLED, minecartHopper.isEnabled());
             }
         }
+
+        states.put(Type.TICKING, TrackManager.isTicking(entity));
 
         return states;
 
