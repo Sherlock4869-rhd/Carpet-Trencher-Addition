@@ -54,4 +54,5 @@ public abstract class PrimedTntMixin{
         double abs = Math.abs(value);
         return (abs >= minMomentum1 && abs <= maxMomentum1) || (abs >= minMomentum2 && abs <= maxMomentum2);
     }
+
 }

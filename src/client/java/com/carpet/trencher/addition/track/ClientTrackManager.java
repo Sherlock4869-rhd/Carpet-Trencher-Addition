@@ -13,6 +13,7 @@ public class ClientTrackManager {
     public static final Map<UUID, Map<TrackState.Type, Object>> trackedEntities = new LinkedHashMap<>();
     public static final Set<UUID> trackOrder = new LinkedHashSet<>();
     public static final Map<UUID, Integer> entitiesColor = new HashMap<>();
+    public static final Set<UUID> tickingEntities = new HashSet<>();
 
     private ClientTrackManager() {}
 
@@ -83,17 +84,5 @@ public class ClientTrackManager {
     }
     */
     //? }
-
-    public static Map<UUID, Map<TrackState.Type, Object>> getTrackedEntities() {
-        return Map.copyOf(trackedEntities);
-    }
-
-    public static Set<UUID> getTrackOrder() {
-        return Set.copyOf(trackOrder);
-    }
-
-    public static Map<UUID, Integer> getEntitiesColor() {
-        return Map.copyOf(entitiesColor);
-    }
 
 }
