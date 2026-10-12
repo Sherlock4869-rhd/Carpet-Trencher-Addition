@@ -1,7 +1,6 @@
 package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
-import com.carpet.trencher.addition.commands.track.EntityTickingAccess;
 import com.carpet.trencher.addition.tick.TntTickingManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PrimedTnt.class)
-public abstract class PrimedTntMixin implements EntityTickingAccess {
+public abstract class PrimedTntMixin{
 
     @Unique private static final double minMomentum1 = 0.00505050505050505;
     @Unique private static final double maxMomentum1 = 0.005050555555555556;

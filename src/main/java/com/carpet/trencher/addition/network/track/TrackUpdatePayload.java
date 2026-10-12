@@ -9,14 +9,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.NotNull;
 
-//? if <= 1.21.10 {
-import net.minecraft.resources.ResourceLocation;
-//? } else {
-/*
-import net.minecraft.resources.Identifier;
-*/
-//? }
-
 import java.util.List;
 import java.util.UUID;
 

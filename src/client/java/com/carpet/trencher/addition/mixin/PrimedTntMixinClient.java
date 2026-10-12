@@ -1,7 +1,6 @@
 package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.tick.ClientTntTickingManager;
-import com.carpet.trencher.addition.track.ClientTrackManager;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Level;

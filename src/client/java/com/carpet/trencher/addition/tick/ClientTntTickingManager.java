@@ -22,7 +22,4 @@ public final class ClientTntTickingManager {
         tickedTnts.remove(uuid);
     }
 
-    public static void clear() {
-        tickedTnts.clear();
-    }
 }

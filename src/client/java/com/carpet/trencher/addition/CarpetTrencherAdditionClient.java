@@ -67,11 +67,9 @@ public class CarpetTrencherAdditionClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(
                 TntTickingPayload.TYPE,
-                (payload, context) -> context.client().execute(() -> {
-                    payload.states().forEach(
-                            ClientTntTickingManager::setState
-                    );
-                })
+                (payload, context) -> context.client().execute(
+                        () -> payload.states().forEach(ClientTntTickingManager::setState)
+                )
         );
 
         ClientPlayNetworking.registerGlobalReceiver(
