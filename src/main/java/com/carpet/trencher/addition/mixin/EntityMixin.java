@@ -2,7 +2,11 @@ package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.commands.track.TrackManager;
 import com.carpet.trencher.addition.commands.track.EntityTrackingAccess;
+import com.carpet.trencher.addition.tick.TntTickingManager;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,12 +26,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 */
 //? }
 
-
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityTrackingAccess {
 
     @Shadow public abstract UUID getUUID();
 
+    @Shadow protected UUID uuid;
     @Unique private boolean cta$tracked;
 
     @Override
@@ -44,9 +48,20 @@ public abstract class EntityMixin implements EntityTrackingAccess {
             method = "remove",
             at = @At("TAIL")
     )
-    private void removeTrackedEntity(Entity.RemovalReason reason, CallbackInfo ci) {
-        if (cta$tracked && reason != null && reason.shouldDestroy()){
-            TrackManager.cleanup((Entity) (Object)this);
+    private void removeEntity(Entity.RemovalReason reason, CallbackInfo ci) {
+
+        if (reason != null && reason.shouldDestroy()) {
+            Entity entity = (Entity) (Object) this;
+            Level level = entity.level();
+            if (level instanceof ServerLevel serverLevel) {
+                if (cta$tracked) {
+                    TrackManager.cleanup(entity);
+                }
+                if (entity instanceof PrimedTnt tnt) {
+                    TntTickingManager.remove(tnt);
+                    TntTickingManager.sendRemoved(serverLevel, tnt);
+                }
+            }
         }
     }
 

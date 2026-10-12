@@ -1,5 +1,6 @@
 package com.carpet.trencher.addition.mixin;
 
+import com.carpet.trencher.addition.tick.ClientTntTickingManager;
 import com.carpet.trencher.addition.track.ClientTrackManager;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -23,7 +24,8 @@ public abstract class PrimedTntMixinClient {
         PrimedTnt tnt = (PrimedTnt) (Object) this;
         Level level = tnt.level();
         UUID uuid = tnt.getUUID();
-        if(level instanceof ClientLevel && !ClientTrackManager.tickingEntities.contains(uuid)) {
+
+        if(level instanceof ClientLevel && !ClientTntTickingManager.getState(uuid)) {
             ci.cancel();
         }
     }

@@ -211,24 +211,4 @@ public class TrackManager {
         }
     }
 
-    public static boolean isTicking(Entity entity){
-        Level level = entity.level();
-        if(level instanceof ServerLevel serverLevel) {
-            long pos = getChunkPos(entity);
-            DistanceManager manager = serverLevel.getChunkSource().chunkMap.getDistanceManager();
-            return manager.inEntityTickingRange(pos);
-        }
-        else {return true;}
-    }
-
-    public static long getChunkPos(Entity entity) {
-        //? if <= 1.21.11 {
-        return entity.chunkPosition().toLong();
-        //? } else {
-        /*
-        return entity.chunkPosition().pack();
-        */
-        //? }
-    }
-
 }

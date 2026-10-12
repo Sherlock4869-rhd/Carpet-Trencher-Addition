@@ -1,6 +1,10 @@
 package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
+import com.carpet.trencher.addition.commands.track.EntityTickingAccess;
+import com.carpet.trencher.addition.tick.TntTickingManager;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Level;
@@ -12,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PrimedTnt.class)
-public abstract class PrimedTntMixin{
+public abstract class PrimedTntMixin implements EntityTickingAccess {
 
     @Unique private static final double minMomentum1 = 0.00505050505050505;
     @Unique private static final double maxMomentum1 = 0.005050555555555556;
@@ -49,10 +53,32 @@ public abstract class PrimedTntMixin{
         tnt.setDeltaMovement(vx, motion.y, vz);
     }
 
+    @Inject(
+            method = "tick",
+            at = @At("HEAD")
+    )
+    private void recordTickTime(CallbackInfo ci) {
+        PrimedTnt tnt = (PrimedTnt) (Object) this;
+        if (tnt.level() instanceof ServerLevel) {
+            TntTickingManager.markTicked(tnt);
+        }
+    }
+
     @Unique
     private static boolean isBadMomentum(double value) {
         double abs = Math.abs(value);
         return (abs >= minMomentum1 && abs <= maxMomentum1) || (abs >= minMomentum2 && abs <= maxMomentum2);
+    }
+
+    @Inject(
+            method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V",
+            at = @At("TAIL")
+    )
+    private void registerTnt(EntityType<? extends PrimedTnt> entityType, Level level, CallbackInfo ci) {
+        if (level instanceof ServerLevel) {
+            PrimedTnt tnt = (PrimedTnt) (Object) this;
+            TntTickingManager.add(tnt);
+        }
     }
 
 }

@@ -93,11 +93,6 @@ public final class ClientTrackHud {
                     }
                 }
 
-                if(type == TrackState.Type.TICKING) {
-                    ClientTrackManager.tickingEntities.add(uuid);
-                    continue;
-                }
-
                 drawString(graphics, formatState(type, value), x + 5, y);
                 y += 12;
 
@@ -132,7 +127,6 @@ public final class ClientTrackHud {
             case ENABLED -> "Enabled: " + value;
             case TAGS -> "Tags: " + value;
             case ITEMS -> "Items: " + value;
-            case TICKING -> "Is Ticking" + value;
         };
     }
 

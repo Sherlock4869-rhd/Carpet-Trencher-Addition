@@ -1,12 +1,23 @@
 package com.carpet.trencher.addition;
 
+import com.carpet.trencher.addition.network.tick.TntRemovedPayload;
+import com.carpet.trencher.addition.network.tick.TntTickingPayload;
 import com.carpet.trencher.addition.network.track.TrackListPayload;
+import com.carpet.trencher.addition.tick.ClientTntTickingManager;
 import com.carpet.trencher.addition.track.ClientTrackHud;
 import com.carpet.trencher.addition.track.ClientTrackManager;
 import com.carpet.trencher.addition.network.track.TrackUpdatePayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+
+//? if <= 1.21.10 {
+import net.minecraft.resources.ResourceLocation;
+//? } else {
+/*
+import net.minecraft.resources.Identifier;
+*/
+//? }
 
 //? if >= 1.21.6 {
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -23,6 +34,15 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 
 public class CarpetTrencherAdditionClient implements ClientModInitializer {
+
+    //? if <= 1.21.10 {
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(CarpetTrencherAdditionMod.MOD_ID, "track_update");
+    //? } else {
+    /*
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(CarpetTrencherAdditionMod.MOD_ID, "track_update");
+    */
+    //? }
+
     @Override
     public void onInitializeClient() {
 
@@ -45,14 +65,30 @@ public class CarpetTrencherAdditionClient implements ClientModInitializer {
                 }
         );
 
+        ClientPlayNetworking.registerGlobalReceiver(
+                TntTickingPayload.TYPE,
+                (payload, context) -> context.client().execute(() -> {
+                    payload.states().forEach(
+                            ClientTntTickingManager::setState
+                    );
+                })
+        );
+
+        ClientPlayNetworking.registerGlobalReceiver(
+                TntRemovedPayload.TYPE,
+                (payload, context) -> context.client().execute(
+                        () -> ClientTntTickingManager.remove(payload.uuid())
+                )
+        );
+
         //? if >= 1.21.6 {
-        HudElementRegistry.addLast(TrackUpdatePayload.ID, ClientTrackHud::render);
+        HudElementRegistry.addLast(ID, ClientTrackHud::render);
         //? } elif >= 1.21.4 {
         /*
         HudLayerRegistrationCallback.EVENT.register(
                 layeredDrawer -> layeredDrawer.attachLayerAfter(
                         IdentifiedLayer.MISC_OVERLAYS,
-                        TrackUpdatePayload.ID,
+                        ID,
                         ClientTrackHud::render
                 )
         );

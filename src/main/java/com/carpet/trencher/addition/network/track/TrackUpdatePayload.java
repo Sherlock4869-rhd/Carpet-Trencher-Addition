@@ -1,6 +1,5 @@
 package com.carpet.trencher.addition.network.track;
 
-import com.carpet.trencher.addition.CarpetTrencherAdditionMod;
 import com.carpet.trencher.addition.commands.track.TrackStateCodecs;
 import com.carpet.trencher.addition.commands.track.TrackState;
 import com.carpet.trencher.addition.utils.NetworkUtils;
@@ -22,14 +21,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record TrackUpdatePayload(UUID entityUuid, List<State> states) implements CustomPacketPayload {
-
-    //? if <= 1.21.10 {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(CarpetTrencherAdditionMod.MOD_ID, "track_update");
-    //? } else {
-    /*
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(CarpetTrencherAdditionMod.MOD_ID, "track_update");
-    */
-    //? }
 
     public static final Type<TrackUpdatePayload> TYPE = new Type<>(NetworkUtils.payloadID("track_update"));
 

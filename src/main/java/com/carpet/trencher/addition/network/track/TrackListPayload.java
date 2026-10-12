@@ -16,7 +16,7 @@ public record TrackListPayload(
         List<UUID> entityUuids
 ) implements CustomPacketPayload {
 
-    public static final Type<TrackListPayload> TYPE = new CustomPacketPayload.Type<>(NetworkUtils.payloadID("track_order"));
+    public static final Type<TrackListPayload> TYPE = new CustomPacketPayload.Type<>(NetworkUtils.payloadID("track_list"));
 
     public enum Action {
         ADD,

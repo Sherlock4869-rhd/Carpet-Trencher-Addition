@@ -2,12 +2,17 @@ package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.commands.track.TrackManager;
 import com.carpet.trencher.addition.commands.track.EntityTrackingAccess;
+import com.carpet.trencher.addition.network.tick.TntTickingPayload;
+import com.carpet.trencher.addition.tick.TntTickingManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.*;
+import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
 public class ServerLevelMixin {
@@ -42,6 +47,25 @@ public class ServerLevelMixin {
                 TrackManager.updateTracking(entity2);
             }
         }
+    }
+
+    @Inject(
+            method = "tick",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/entity/EntityTickList;forEach(Ljava/util/function/Consumer;)V",
+                    shift = At.Shift.AFTER
+            )
+    )
+    private void afterEntityTick(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+        ServerLevel level = (ServerLevel) (Object) this;
+        Map<UUID, Boolean> states = new HashMap<>();
+        TntTickingManager.forEachChanged(level, states::put);
+        TntTickingPayload payload = new TntTickingPayload(states);
+        if (!states.isEmpty()) {
+            TntTickingManager.sendTickingState(level, payload);
+        }
+        TntTickingManager.reset(level);
     }
 
 }
