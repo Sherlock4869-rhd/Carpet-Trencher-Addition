@@ -15,8 +15,7 @@ import java.util.function.BiConsumer;
 
 public final class TntTickingManager {
 
-    private static final Map<ServerLevel, WorldState> WORLDS =
-            new WeakHashMap<>();
+    private static final Map<ServerLevel, WorldState> WORLDS = new WeakHashMap<>();
 
     private static final class WorldState {
         private final Map<UUID, Boolean> tickedTnts = new HashMap<>();
@@ -35,7 +34,7 @@ public final class TntTickingManager {
             WorldState state = getState(level);
             UUID uuid = tnt.getUUID();
             state.tickedTnts.put(uuid, false);
-            state.cache.put(uuid, true);
+            state.cache.put(uuid, false);
         }
     }
 
@@ -49,7 +48,6 @@ public final class TntTickingManager {
         WorldState state = getState(level);
         state.tickedTnts.forEach((uuid, ticking) -> {
             Boolean previous = state.cache.get(uuid);
-
             if (previous != null && ticking != previous) {
                 consumer.accept(uuid, ticking);
                 state.cache.put(uuid, ticking);
