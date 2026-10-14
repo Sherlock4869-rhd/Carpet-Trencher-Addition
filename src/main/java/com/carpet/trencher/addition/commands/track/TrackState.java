@@ -27,7 +27,6 @@ public final class TrackState {
     public enum ValueType{
         STRING_SET(TrackStateCodecs.STRING_SET_CODEC),
         VEC3(TrackStateCodecs.VEC3_CODEC),
-        ROTATION(TrackStateCodecs.ROTATION_CODEC),
         BOOLEAN(TrackStateCodecs.BOOLEAN_CODEC),
         FLOAT(TrackStateCodecs.FLOAT_CODEC),
         DOUBLE(TrackStateCodecs.DOUBLE_CODEC),
@@ -37,26 +36,20 @@ public final class TrackState {
 
         private final StreamCodec<RegistryFriendlyByteBuf, ?> codec;
 
-        ValueType(
-                StreamCodec<RegistryFriendlyByteBuf, ?> codec
-        ) {
+        ValueType(StreamCodec<RegistryFriendlyByteBuf, ?> codec) {
             this.codec = codec;
         }
 
         @SuppressWarnings("unchecked")
-        public void encode(
-                RegistryFriendlyByteBuf buf,
-                Object value
-        ) {
+        public void encode(RegistryFriendlyByteBuf buf, Object value) {
             ((StreamCodec<RegistryFriendlyByteBuf, Object>) codec)
                     .encode(buf, value);
         }
 
-        public Object decode(
-                RegistryFriendlyByteBuf buf
-        ) {
+        public Object decode(RegistryFriendlyByteBuf buf) {
             return codec.decode(buf);
         }
+
     }
 
     public enum Type {
@@ -64,18 +57,19 @@ public final class TrackState {
         TAGS(2, ValueType.STRING_SET),
         POS(3, ValueType.VEC3),
         MOTION(4, ValueType.VEC3),
-        ROTATION(5, ValueType.ROTATION),
-        ON_GROUND(6, ValueType.BOOLEAN),
+        ROT_X(5,ValueType.FLOAT),
+        ROT_Y(6,ValueType.FLOAT),
+        ON_GROUND(7, ValueType.BOOLEAN),
         //? if >= 1.21.5 {
-        FALL_DISTANCE(7, ValueType.DOUBLE),
+        FALL_DISTANCE(8, ValueType.DOUBLE),
         //? } else {
         /*
-        FALL_DISTANCE(7, ValueType.FLOAT),
+        FALL_DISTANCE(8, ValueType.FLOAT),
         */
         //? }
-        FUSE(8, ValueType.INT),
-        ENABLED(9, ValueType.BOOLEAN),
-        ITEMS(10, ValueType.ITEM_STACK_LIST);
+        FUSE(9, ValueType.INT),
+        ENABLED(10, ValueType.BOOLEAN),
+        ITEMS(11, ValueType.ITEM_STACK_LIST);
 
         private final int id;
         private final ValueType valueType;
@@ -99,14 +93,10 @@ public final class TrackState {
                     return type;
                 }
             }
-
             throw new IllegalArgumentException("Unknown track state type: " + id);
-
         }
 
     }
-
-    public record Rotation(float x, float y) {}
 
     public static Map<Type, Object> getState(Entity entity) {
 
@@ -124,10 +114,8 @@ public final class TrackState {
 
         states.put(Type.POS, entity.position());
         states.put(Type.MOTION, entity.getDeltaMovement());
-        states.put(
-                Type.ROTATION,
-                new Rotation(entity.getXRot(), entity.getYRot())
-        );
+        states.put(Type.ROT_X, entity.getXRot());
+        states.put(Type.ROT_Y, entity.getYRot());
 
         if (entity instanceof PrimedTnt tnt) {
             states.put(Type.FUSE, tnt.getFuse());
@@ -147,9 +135,7 @@ public final class TrackState {
 
     }
 
-    public static List<TrackUpdatePayload.State> toPayloadStates(
-            Map<Type, Object> states
-    ) {
+    public static List<TrackUpdatePayload.State> toPayloadStates(Map<Type, Object> states) {
         return states.entrySet()
                 .stream()
                 .map(entry -> new TrackUpdatePayload.State(
@@ -158,5 +144,4 @@ public final class TrackState {
                 ))
                 .toList();
     }
-
 }

@@ -28,7 +28,7 @@ public final class TrackStateCodecs {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Vec3> VEC3_CODEC =
             StreamCodec.of(
-                    //? if >= 1.21.1 {
+                    //? if >= 1.21.2 {
                     Vec3.STREAM_CODEC::encode,
                     Vec3.STREAM_CODEC::decode
                     //? } else {
@@ -45,18 +45,6 @@ public final class TrackStateCodecs {
                     )
                      */
                     //? }
-            );
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, TrackState.Rotation> ROTATION_CODEC =
-            StreamCodec.of(
-                    (buf, value) -> {
-                        buf.writeFloat(value.x());
-                        buf.writeFloat(value.y());
-                    },
-                    buf -> new TrackState.Rotation(
-                            buf.readFloat(),
-                            buf.readFloat()
-                    )
             );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Boolean> BOOLEAN_CODEC =
@@ -91,14 +79,12 @@ public final class TrackStateCodecs {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, java.util.Set<String>> STRING_SET_CODEC =
             ByteBufCodecs.collection(
-                    java.util.HashSet::new,
-                    STRING_CODEC
+                    java.util.HashSet::new, STRING_CODEC
             );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, List<ItemStack>> ITEM_STACK_LIST_CODEC =
             ByteBufCodecs.collection(
-                    ArrayList::new,
-                    ItemStack.STREAM_CODEC
+                    ArrayList::new, ItemStack.STREAM_CODEC
             );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, TrackState.Type> TYPE_CODEC =

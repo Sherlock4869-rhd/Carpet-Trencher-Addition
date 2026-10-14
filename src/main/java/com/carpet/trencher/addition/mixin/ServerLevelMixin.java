@@ -58,6 +58,7 @@ public class ServerLevelMixin {
             )
     )
     private void afterEntityTick(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+
         ServerLevel level = (ServerLevel) (Object) this;
         Map<UUID, Boolean> states = new HashMap<>();
         TntTickingManager.forEachChanged(level, states::put);
@@ -66,6 +67,11 @@ public class ServerLevelMixin {
             TntTickingManager.sendTickingState(level, payload);
         }
         TntTickingManager.reset(level);
+
+        if (level.getServer() != null) {
+            TrackManager.flushUpdates(level);
+        }
+
     }
 
 }

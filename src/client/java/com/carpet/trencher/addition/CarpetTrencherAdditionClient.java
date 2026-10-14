@@ -50,19 +50,20 @@ public class CarpetTrencherAdditionClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(
                 TrackUpdatePayload.TYPE,
-                (payload, context) ->
-                        ClientTrackManager.update(payload)
+                (payload, context) -> context.client().execute(
+                        () ->ClientTrackManager.update(payload)
+                )
         );
 
         ClientPlayNetworking.registerGlobalReceiver(
                 TrackListPayload.TYPE,
-                (payload, context) -> {
-                    switch (payload.action()) {
-                        case ADD -> ClientTrackManager.add(payload.entityUuids());
-                        case REMOVE -> ClientTrackManager.remove(payload.entityUuid());
-                        case CLEAR -> ClientTrackManager.clear();
-                }
-                }
+                (payload, context) -> context.client().execute(
+                            () -> {switch (payload.action()) {
+                                case ADD -> ClientTrackManager.add(payload.entityUuids());
+                                case REMOVE -> ClientTrackManager.remove(payload.entityUuid());
+                                case CLEAR -> ClientTrackManager.clear();
+                            }}
+                )
         );
 
         ClientPlayNetworking.registerGlobalReceiver(

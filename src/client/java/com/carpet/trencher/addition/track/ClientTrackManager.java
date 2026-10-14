@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ClientTrackManager {
 
@@ -17,15 +16,15 @@ public class ClientTrackManager {
     private ClientTrackManager() {}
 
     public static void update(TrackUpdatePayload payload) {
-        Map<TrackState.Type, Object> states =
-                payload.states().stream().collect(Collectors.toMap(
-                                TrackUpdatePayload.State::type,
-                                TrackUpdatePayload.State::value,
-                                (a, b) -> b,
-                                LinkedHashMap::new
-                        ));
-
-        trackedEntities.put(payload.entityUuid(), states);
+        for (TrackUpdatePayload.EntityUpdate entityUpdate : payload.entities()) {
+            Map<TrackState.Type, Object> states = trackedEntities.computeIfAbsent(
+                    entityUpdate.entityUuid(),
+                    ignored -> new EnumMap<>(TrackState.Type.class)
+            );
+            for (TrackUpdatePayload.State state : entityUpdate.states()) {
+                states.put(state.type(), state.value());
+            }
+        }
     }
 
     public static Map<TrackState.Type, Object> get(UUID entityUuid) {

@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
@@ -17,6 +18,7 @@ public class TrackManager {
 
     public static final Map<UUID, Map<UUID, Component>> playerTrackedEntities = new HashMap<>();
     public static final Map<UUID, Set<UUID>> entityTrackers = new HashMap<>();
+    private static final Map<ServerLevel, Map<UUID, Map<UUID, List<TrackUpdatePayload.State>>>> pendingUpdates = new HashMap<>();
 
     public static void startTracking(ServerPlayer tracker, Collection<? extends Entity> entities) {
 
@@ -33,7 +35,7 @@ public class TrackManager {
                         .add(trackerUuid);
                 ((EntityTrackingAccess) entity).cta$setTracked(true);
                 addedEntities.add(entityUuid);
-                updateTracking(entity);
+                sendInitialTracking(tracker, entity);
             }
             sendTrackOrderAdd(tracker, addedEntities);
         });
@@ -121,56 +123,68 @@ public class TrackManager {
 
     }
 
+    public static void sendInitialTracking(ServerPlayer tracker, Entity entity) {
+        List<TrackUpdatePayload.State> states = TrackState.toPayloadStates(TrackState.getState(entity));
+        TrackUpdatePayload.EntityUpdate entityUpdate = new TrackUpdatePayload.EntityUpdate(entity.getUUID(), states);
+        ServerPlayNetworking.send(tracker, new TrackUpdatePayload(List.of(entityUpdate)));
+    }
+
     public static void updateTracking(Entity entity) {
-
         Set<UUID> trackerUuids = entityTrackers.get(entity.getUUID());
-
         if (trackerUuids == null || trackerUuids.isEmpty()) {
             return;
         }
-
-        MinecraftServer server = entity.level().getServer();
-
-        if (server == null) {
-            return;
-        }
-
-        Map<TrackState.Type, Object> trackedStates = TrackState.getState(entity);
-
+        ServerLevel level = (ServerLevel) entity.level();
+        List<TrackUpdatePayload.State> states = TrackState.toPayloadStates(TrackState.getState(entity));
+        Map<UUID, Map<UUID, List<TrackUpdatePayload.State>>> levelUpdates = pendingUpdates.computeIfAbsent(level, ignored -> new HashMap<>());
         for (UUID trackerUuid : trackerUuids) {
-
-            ServerPlayer tracker = server.getPlayerList().getPlayer(trackerUuid);
-            List<TrackUpdatePayload.State> states = TrackState.toPayloadStates(trackedStates);
-            TrackUpdatePayload payload = new TrackUpdatePayload(entity.getUUID(), states);
-
-            if (tracker != null) {
-                ServerPlayNetworking.send(tracker, payload);
-            }
-
+            levelUpdates.computeIfAbsent(trackerUuid, ignored -> new LinkedHashMap<>())
+                    .put(entity.getUUID(), states);
         }
     }
 
-    public static void cleanup(Entity entity) {
+    public static void flushUpdates(ServerLevel level) {
+        Map<UUID, Map<UUID, List<TrackUpdatePayload.State>>> levelUpdates =
+                pendingUpdates.remove(level);
+        if (levelUpdates == null || levelUpdates.isEmpty()) {
+            return;
+        }
+        MinecraftServer server = level.getServer();
+        levelUpdates.forEach((trackerUuid, entityUpdates) -> {
+            ServerPlayer tracker = server.getPlayerList().getPlayer(trackerUuid);
+            if (tracker == null || entityUpdates.isEmpty()) {
+                return;
+            }
+            List<TrackUpdatePayload.EntityUpdate> entities = entityUpdates.entrySet()
+                    .stream().map(
+                            entry ->
+                                    new TrackUpdatePayload.EntityUpdate(
+                                            entry.getKey(),
+                                            entry.getValue()
+                                    )
+                    )
+                    .toList();
+            ServerPlayNetworking.send(
+                    tracker,
+                    new TrackUpdatePayload(entities)
+            );
+        });
+    }
 
+    public static void cleanup(Entity entity) {
         UUID entityUuid = entity.getUUID();
         Set<UUID> trackerUuids = entityTrackers.remove(entityUuid);
-
         if (trackerUuids != null) {
-
             MinecraftServer server = entity.level().getServer();
-
             for (UUID trackerUuid : trackerUuids) {
-
                 Map<UUID, Component> trackedEntities = playerTrackedEntities.get(trackerUuid);
                 Component entityName = null;
-
                 if (trackedEntities != null) {
                     entityName = trackedEntities.remove(entityUuid);
                     if (trackedEntities.isEmpty()) {
                         playerTrackedEntities.remove(trackerUuid);
                     }
                 }
-
                 if (server != null) {
                     ServerPlayer tracker = server.getPlayerList().getPlayer(trackerUuid);
                     if (tracker != null && entityName != null) {
@@ -179,9 +193,7 @@ public class TrackManager {
                         );
                     }
                 }
-
             }
-
         }
 
     }

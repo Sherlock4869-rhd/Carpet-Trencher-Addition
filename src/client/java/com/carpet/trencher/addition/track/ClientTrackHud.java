@@ -83,19 +83,19 @@ public final class ClientTrackHud {
             y += 12;
 
             for (Map.Entry<TrackState.Type, Object> state : states.entrySet()) {
-
                 TrackState.Type type = state.getKey();
                 Object value = state.getValue();
-
-                if (type == TrackState.Type.TAGS && value instanceof Set<?> set) {
-                    if (set.isEmpty()) {
-                        continue;
-                    }
+                if (type == TrackState.Type.ROT_Y) {
+                    continue;
                 }
-
-                drawString(graphics, formatState(type, value), x + 5, y);
-                y += 12;
-
+                if (type == TrackState.Type.TAGS && value instanceof Set<?> set && set.isEmpty()) {
+                    continue;
+                }
+                String text = formatState(type, value, states);
+                if (text != null) {
+                    drawString(graphics, text, x + 5, y);
+                    y += 12;
+                }
             }
 
             y += 6;
@@ -112,14 +112,18 @@ public final class ClientTrackHud {
 
     }
 
-    private static String formatState(TrackState.Type type, Object value) {
+    private static String formatState(TrackState.Type type, Object value, Map<TrackState.Type, Object> states) {
         return switch (type) {
             case ID -> "ID: " + value;
             case POS -> "Pos: " + value;
             case MOTION -> "Motion: " + value;
-            case ROTATION -> {
-                TrackState.Rotation rotation = (TrackState.Rotation) value;
-                yield "Rotation: (" + rotation.x() + "°, " + rotation.y() + "°)";
+            case ROT_X, ROT_Y -> {
+                Object x = states.get(TrackState.Type.ROT_X);
+                Object y = states.get(TrackState.Type.ROT_Y);
+                if (x == null || y == null) {
+                    yield null;
+                }
+                yield "Rotation: (" + x + "°, " + y + "°)";
             }
             case ON_GROUND -> "On Ground: " + value;
             case FALL_DISTANCE -> "Fall Distance: " + value;
