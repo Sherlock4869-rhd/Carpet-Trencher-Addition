@@ -16,7 +16,10 @@ public record TrackListPayload(
         List<UUID> entityUuids
 ) implements CustomPacketPayload {
 
-    public static final Type<TrackListPayload> TYPE = new CustomPacketPayload.Type<>(NetworkUtils.payloadID("track_list"));
+    public static final Type<TrackListPayload> TYPE =
+            new CustomPacketPayload.Type<>(
+                    NetworkUtils.payloadID("track_list")
+            );
 
     public enum Action {
         ADD,
@@ -39,7 +42,6 @@ public record TrackListPayload(
                             case CLEAR -> {}
                         }
                     },
-
                     buf -> {
                         Action action = buf.readEnum(Action.class);
                         return switch (action) {
@@ -54,7 +56,8 @@ public record TrackListPayload(
                             case REMOVE -> new TrackListPayload(action, buf.readUUID(), List.of());
                             case CLEAR -> new TrackListPayload(action, null, List.of());
                         };
-                    });
+                    }
+            );
 
     @Override
     public CustomPacketPayload.@NotNull Type<? extends CustomPacketPayload> type() {
@@ -72,5 +75,4 @@ public record TrackListPayload(
     public static TrackListPayload clear() {
         return new TrackListPayload(Action.CLEAR, null, List.of());
     }
-
 }

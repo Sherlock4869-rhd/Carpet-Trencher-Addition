@@ -16,35 +16,43 @@ import java.util.*;
 
 public class TrackManager {
 
+    private static final Map<UUID, Map<TrackState.Type, Object>> cache = new HashMap<>();
+    private static final Map<UUID, Map<UUID, Map<TrackState.Type, Object>>> pendingUpdates = new HashMap<>();
     public static final Map<UUID, Map<UUID, Component>> playerTrackedEntities = new HashMap<>();
     public static final Map<UUID, Set<UUID>> entityTrackers = new HashMap<>();
-    private static final Map<ServerLevel, Map<UUID, Map<UUID, List<TrackUpdatePayload.State>>>> pendingUpdates = new HashMap<>();
 
     public static void startTracking(ServerPlayer tracker, Collection<? extends Entity> entities) {
-
         UUID trackerUuid = tracker.getUUID();
-        Map<UUID, Component> trackedEntities = playerTrackedEntities.computeIfAbsent(trackerUuid, uuid -> new LinkedHashMap<>());
-        List<UUID> addedEntities = new ArrayList<>();
+        Map<UUID, Component> trackedEntities =
+                playerTrackedEntities.computeIfAbsent(
+                        trackerUuid, ignored -> new LinkedHashMap<>()
+                );
+        List<UUID> addedEntityUuids = new ArrayList<>();
+        List<Component> selectedEntityNames = new ArrayList<>();
 
-        entities.forEach(entity -> {
+        for (Entity entity : entities) {
+            selectedEntityNames.add(entity.getName());
+
             UUID entityUuid = entity.getUUID();
-            if (!trackedEntities.containsKey(entityUuid)) {
-                trackedEntities.put(entityUuid, entity.getName());
-                entityTrackers
-                        .computeIfAbsent(entityUuid, uuid -> new HashSet<>())
-                        .add(trackerUuid);
-                ((EntityTrackingAccess) entity).cta$setTracked(true);
-                addedEntities.add(entityUuid);
-                sendInitialTracking(tracker, entity);
+            if (trackedEntities.containsKey(entityUuid)) {
+                continue;
             }
-            sendTrackOrderAdd(tracker, addedEntities);
-        });
 
-        List<Component> nameList = entities.stream().map(Entity::getName).toList();
-        MutableComponent message = ComponentUtils.formatComponentList("[CTA] Successfully tracked: ", nameList);
+            trackedEntities.put(entityUuid, entity.getName());
+            entityTrackers.computeIfAbsent(
+                    entityUuid, ignored -> new HashSet<>()
+            ).add(trackerUuid);
+            ((EntityTrackingAccess) entity).cta$setTracked(true);
+            addedEntityUuids.add(entityUuid);
+            sendInitialTracking(tracker, entity);
+        }
 
+        sendTrackOrderAdd(tracker, addedEntityUuids);
+
+        MutableComponent message = ComponentUtils.formatComponentList(
+                "[CTA] Successfully tracked: ", selectedEntityNames
+        );
         tracker.sendSystemMessage(message);
-
     }
 
     private static void sendTrackOrderAdd(ServerPlayer tracker, List<UUID> entityUuids) {
@@ -55,169 +63,214 @@ public class TrackManager {
     }
 
     public static void listTrackedEntities(ServerPlayer tracker) {
-        UUID trackerUuid = tracker.getUUID();
-        Map<UUID, Component> trackedEntities = playerTrackedEntities.get(trackerUuid);
-        Collection<Component> nameList =
-                trackedEntities == null
-                        ? null :
-                        trackedEntities.values();
-        MutableComponent message = ComponentUtils.formatComponentList("[CTA] Tracked entities: ", nameList);
+        Map<UUID, Component> trackedEntities = playerTrackedEntities.get(tracker.getUUID());
+        Collection<Component> nameList = trackedEntities == null ? null : trackedEntities.values();
+        MutableComponent message =
+                ComponentUtils.formatComponentList("[CTA] Tracked entities: ", nameList);
         tracker.sendSystemMessage(message);
     }
 
-    public static void clearTrackedEntities(ServerPlayer tracker){
-
+    public static void clearTrackedEntities(ServerPlayer tracker) {
         UUID trackerUuid = tracker.getUUID();
         Map<UUID, Component> trackedEntities = playerTrackedEntities.remove(trackerUuid);
-
+        clearPendingUpdatesForTracker(trackerUuid);
         if (trackedEntities != null) {
-            trackedEntities.forEach((uuid, name) -> {
-                Set<UUID> trackerUuids = entityTrackers.get(uuid);
-                trackerUuids.remove(trackerUuid);
-                if (trackerUuids.isEmpty()) {
-                    entityTrackers.remove(uuid);
-                }
-            });
-        }
-
-        ServerPlayNetworking.send(tracker, TrackListPayload.clear());
-
-    }
-
-    public static void removeTrackedEntity(ServerPlayer tracker, Integer index) {
-
-        UUID trackerUuid = tracker.getUUID();
-        if (playerTrackedEntities.containsKey(trackerUuid)) {
-
-            Map<UUID, Component> trackedEntities = playerTrackedEntities.get(trackerUuid);
-            List<UUID> entityUuids = new ArrayList<>(trackedEntities.keySet());
-            int size = entityUuids.size();
-            if (index >= size) {
-
-                tracker.sendSystemMessage(
-                        Component
-                                .literal("Please enter a number between 1 and " + size)
-                                .withStyle(ChatFormatting.RED)
-                );
-
-            } else {
-
-                UUID entityUuid = entityUuids.get(index);
-                Component entityName = trackedEntities.remove(entityUuid);
-                if(trackedEntities.isEmpty()) {
-                    playerTrackedEntities.remove(trackerUuid);
-                }
-
+            for (UUID entityUuid : trackedEntities.keySet()) {
                 Set<UUID> trackerUuids = entityTrackers.get(entityUuid);
+                if (trackerUuids == null) {
+                    continue;
+                }
                 trackerUuids.remove(trackerUuid);
                 if (trackerUuids.isEmpty()) {
                     entityTrackers.remove(entityUuid);
+                    removeStateCache(entityUuid);
                 }
-
-                ServerPlayNetworking.send(tracker, TrackListPayload.remove(entityUuid));
-                tracker.sendSystemMessage(Component.literal("[CTA]Stop tracking: ").append(entityName));
-
             }
-
         }
+        ServerPlayNetworking.send(tracker, TrackListPayload.clear());
+    }
 
+    public static void removeTrackedEntity(ServerPlayer tracker, Integer index) {
+        UUID trackerUuid = tracker.getUUID();
+        Map<UUID, Component> trackedEntities = playerTrackedEntities.get(trackerUuid);
+        if (trackedEntities == null) {
+            return;
+        }
+        List<UUID> entityUuids = new ArrayList<>(trackedEntities.keySet());
+        int size = entityUuids.size();
+        if (index < 0 || index >= size) {
+            tracker.sendSystemMessage(
+                    Component.literal("Please enter a number between 1 and " + size)
+                            .withStyle(ChatFormatting.RED)
+            );
+            return;
+        }
+        UUID entityUuid = entityUuids.get(index);
+        Component entityName = trackedEntities.remove(entityUuid);
+        if (trackedEntities.isEmpty()) {
+            playerTrackedEntities.remove(trackerUuid);
+        }
+        removePendingUpdate(trackerUuid, entityUuid);
+        Set<UUID> trackerUuids = entityTrackers.get(entityUuid);
+        if (trackerUuids != null) {
+            trackerUuids.remove(trackerUuid);
+            if (trackerUuids.isEmpty()) {
+                entityTrackers.remove(entityUuid);
+                removeStateCache(entityUuid);
+            }
+        }
+        ServerPlayNetworking.send(tracker, TrackListPayload.remove(entityUuid));
+        tracker.sendSystemMessage(
+                Component.literal("[CTA] Stop tracking: ").append(entityName)
+        );
     }
 
     public static void sendInitialTracking(ServerPlayer tracker, Entity entity) {
-        List<TrackUpdatePayload.State> states = TrackState.toPayloadStates(TrackState.getState(entity));
-        TrackUpdatePayload.EntityUpdate entityUpdate = new TrackUpdatePayload.EntityUpdate(entity.getUUID(), states);
+        UUID entityUuid = entity.getUUID();
+        Map<TrackState.Type, Object> currentState = TrackState.getState(entity);
+        cache.put(entityUuid, new HashMap<>(currentState));
+        List<TrackUpdatePayload.State> states = TrackState.toPayloadStates(currentState);
+        TrackUpdatePayload.EntityUpdate entityUpdate = new TrackUpdatePayload.EntityUpdate(entityUuid, states);
         ServerPlayNetworking.send(tracker, new TrackUpdatePayload(List.of(entityUpdate)));
     }
 
     public static void updateTracking(Entity entity) {
-        Set<UUID> trackerUuids = entityTrackers.get(entity.getUUID());
+        UUID entityUuid = entity.getUUID();
+        Set<UUID> trackerUuids = entityTrackers.get(entityUuid);
         if (trackerUuids == null || trackerUuids.isEmpty()) {
             return;
         }
-        ServerLevel level = (ServerLevel) entity.level();
-        List<TrackUpdatePayload.State> states = TrackState.toPayloadStates(TrackState.getState(entity));
-        Map<UUID, Map<UUID, List<TrackUpdatePayload.State>>> levelUpdates = pendingUpdates.computeIfAbsent(level, ignored -> new HashMap<>());
+        Map<TrackState.Type, Object> currentState = TrackState.getState(entity);
+        Map<TrackState.Type, Object> cachedState = cache.get(entityUuid);
+        if (cachedState == null) {
+            cache.put(entityUuid, new HashMap<>(currentState));
+            for (UUID trackerUuid : trackerUuids) {
+                pendingUpdates.computeIfAbsent(
+                        trackerUuid, ignored -> new LinkedHashMap<>()
+                ).put(entityUuid, new LinkedHashMap<>(currentState));
+            }
+            return;
+        }
+
+        Map<TrackState.Type, Object> changedStates = new LinkedHashMap<>();
+
+        for (Map.Entry<TrackState.Type, Object> entry : currentState.entrySet()) {
+            TrackState.Type type = entry.getKey();
+            Object value = entry.getValue();
+            if (!Objects.equals(cachedState.get(type), value)) {
+                changedStates.put(type, value);
+                cachedState.put(type, value);
+            }
+        }
+        if (changedStates.isEmpty()) {
+            return;
+        }
         for (UUID trackerUuid : trackerUuids) {
-            levelUpdates.computeIfAbsent(trackerUuid, ignored -> new LinkedHashMap<>())
-                    .put(entity.getUUID(), states);
+            Map<UUID, Map<TrackState.Type, Object>> trackerUpdates =
+                    pendingUpdates.computeIfAbsent(
+                            trackerUuid, ignored -> new LinkedHashMap<>()
+                    );
+            Map<TrackState.Type, Object> pendingStates =
+                    trackerUpdates.computeIfAbsent(
+                            entityUuid, ignored -> new LinkedHashMap<>()
+                    );
+            pendingStates.putAll(changedStates);
         }
     }
 
     public static void flushUpdates(ServerLevel level) {
-        Map<UUID, Map<UUID, List<TrackUpdatePayload.State>>> levelUpdates =
-                pendingUpdates.remove(level);
-        if (levelUpdates == null || levelUpdates.isEmpty()) {
+        if (pendingUpdates.isEmpty()) {
             return;
         }
+        Map<UUID, Map<UUID, Map<TrackState.Type, Object>>> updates = new HashMap<>(pendingUpdates);
+        pendingUpdates.clear();
         MinecraftServer server = level.getServer();
-        levelUpdates.forEach((trackerUuid, entityUpdates) -> {
+        updates.forEach((trackerUuid, entityUpdates) -> {
             ServerPlayer tracker = server.getPlayerList().getPlayer(trackerUuid);
             if (tracker == null || entityUpdates.isEmpty()) {
                 return;
             }
-            List<TrackUpdatePayload.EntityUpdate> entities = entityUpdates.entrySet()
-                    .stream().map(
-                            entry ->
-                                    new TrackUpdatePayload.EntityUpdate(
-                                            entry.getKey(),
-                                            entry.getValue()
-                                    )
-                    )
-                    .toList();
-            ServerPlayNetworking.send(
-                    tracker,
-                    new TrackUpdatePayload(entities)
-            );
+            List<TrackUpdatePayload.EntityUpdate> entities =
+                    entityUpdates.entrySet().stream()
+                            .map(entry -> {
+                                List<TrackUpdatePayload.State> states =
+                                        TrackState.toPayloadStates(entry.getValue());
+                                return new TrackUpdatePayload.EntityUpdate(entry.getKey(), states);
+                            }).toList();
+            ServerPlayNetworking.send(tracker, new TrackUpdatePayload(entities));
         });
+    }
+
+    private static void removeStateCache(UUID entityUuid) {
+        cache.remove(entityUuid);
+        pendingUpdates.entrySet().removeIf(entry -> {
+            entry.getValue().remove(entityUuid);
+            return entry.getValue().isEmpty();
+        });
+    }
+
+    private static void removePendingUpdate(UUID trackerUuid, UUID entityUuid) {
+        Map<UUID, Map<TrackState.Type, Object>> trackerUpdates = pendingUpdates.get(trackerUuid);
+        if (trackerUpdates == null) {
+            return;
+        }
+        trackerUpdates.remove(entityUuid);
+        if (trackerUpdates.isEmpty()) {
+            pendingUpdates.remove(trackerUuid);
+        }
+    }
+    private static void clearPendingUpdatesForTracker(UUID trackerUuid) {
+        pendingUpdates.remove(trackerUuid);
     }
 
     public static void cleanup(Entity entity) {
         UUID entityUuid = entity.getUUID();
+        removeStateCache(entityUuid);
         Set<UUID> trackerUuids = entityTrackers.remove(entityUuid);
-        if (trackerUuids != null) {
-            MinecraftServer server = entity.level().getServer();
-            for (UUID trackerUuid : trackerUuids) {
-                Map<UUID, Component> trackedEntities = playerTrackedEntities.get(trackerUuid);
-                Component entityName = null;
-                if (trackedEntities != null) {
-                    entityName = trackedEntities.remove(entityUuid);
-                    if (trackedEntities.isEmpty()) {
-                        playerTrackedEntities.remove(trackerUuid);
-                    }
-                }
-                if (server != null) {
-                    ServerPlayer tracker = server.getPlayerList().getPlayer(trackerUuid);
-                    if (tracker != null && entityName != null) {
-                        ServerPlayNetworking.send(tracker, TrackListPayload.remove(entityUuid));
-                        tracker.sendSystemMessage(Component.literal("[CTA] Stopped tracking: ").append(entityName)
-                        );
-                    }
+        if (trackerUuids == null || trackerUuids.isEmpty()) {
+            return;
+        }
+        MinecraftServer server = entity.level().getServer();
+        for (UUID trackerUuid : trackerUuids) {
+            Map<UUID, Component> trackedEntities = playerTrackedEntities.get(trackerUuid);
+            Component entityName = null;
+            if (trackedEntities != null) {
+                entityName = trackedEntities.remove(entityUuid);
+                if (trackedEntities.isEmpty()) {
+                    playerTrackedEntities.remove(trackerUuid);
                 }
             }
+            if (server == null) {
+                continue;
+            }
+            ServerPlayer tracker = server.getPlayerList().getPlayer(trackerUuid);
+            if (tracker == null || entityName == null) {
+                continue;
+            }
+            ServerPlayNetworking.send(tracker, TrackListPayload.remove(entityUuid));
+            tracker.sendSystemMessage(
+                    Component.literal("[CTA] Stopped tracking: ").append(entityName)
+            );
         }
-
     }
 
     public static void onPlayerLoggedOut(ServerPlayer player) {
-
         UUID playerUuid = player.getUUID();
         Map<UUID, Component> trackedEntities = playerTrackedEntities.remove(playerUuid);
-
-        if (trackedEntities != null) {
-
-            trackedEntities.forEach((uuid, name) -> {
-
-                Set<UUID> trackerUuids = entityTrackers.get(uuid);
-
-                if (trackerUuids != null) {
-                    trackerUuids.remove(playerUuid);
-                    if (trackerUuids.isEmpty()) {
-                        entityTrackers.remove(uuid);
-                    }
-                }
-
-            });
+        clearPendingUpdatesForTracker(playerUuid);
+        if (trackedEntities == null) {
+            return;
+        }
+        for (UUID entityUuid : trackedEntities.keySet()) {
+            Set<UUID> trackerUuids = entityTrackers.get(entityUuid);
+            if (trackerUuids == null) {
+                continue;
+            }
+            trackerUuids.remove(playerUuid);
+            if (trackerUuids.isEmpty()) {
+                entityTrackers.remove(entityUuid);
+                removeStateCache(entityUuid);
+            }
         }
     }
-
 }

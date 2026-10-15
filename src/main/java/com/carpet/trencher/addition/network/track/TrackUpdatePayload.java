@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public record TrackUpdatePayload(List<EntityUpdate> entities) implements CustomPacketPayload {
+public record TrackUpdatePayload(
+        List<EntityUpdate> entities
+) implements CustomPacketPayload {
 
     public static final Type<TrackUpdatePayload> TYPE = new Type<>(NetworkUtils.payloadID("track_update"));
 
-    public record EntityUpdate(UUID entityUuid, List<State> states) { }
+    public record EntityUpdate(UUID entityUuid, List<State> states) {}
 
     public record State(TrackState.Type type, Object value) {}
 
@@ -36,10 +38,7 @@ public record TrackUpdatePayload(List<EntityUpdate> entities) implements CustomP
             );
 
     private static final StreamCodec<RegistryFriendlyByteBuf, List<State>> STATE_LIST_CODEC =
-            ByteBufCodecs.collection(
-                    ArrayList::new,
-                    STATE_CODEC
-            );
+            ByteBufCodecs.collection(ArrayList::new, STATE_CODEC);
 
     private static final StreamCodec<RegistryFriendlyByteBuf, EntityUpdate> ENTITY_UPDATE_CODEC =
             StreamCodec.of(
@@ -55,17 +54,12 @@ public record TrackUpdatePayload(List<EntityUpdate> entities) implements CustomP
             );
 
     private static final StreamCodec<RegistryFriendlyByteBuf, List<EntityUpdate>> ENTITY_LIST_CODEC =
-            ByteBufCodecs.collection(
-                    ArrayList::new,
-                    ENTITY_UPDATE_CODEC
-            );
+            ByteBufCodecs.collection(ArrayList::new, ENTITY_UPDATE_CODEC);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, TrackUpdatePayload> CODEC =
             StreamCodec.of(
-                    (buf, payload) ->
-                            ENTITY_LIST_CODEC.encode(buf, payload.entities()),
-                    buf ->
-                            new TrackUpdatePayload(ENTITY_LIST_CODEC.decode(buf))
+                    (buf, payload) -> ENTITY_LIST_CODEC.encode(buf, payload.entities()),
+                    buf -> new TrackUpdatePayload(ENTITY_LIST_CODEC.decode(buf))
             );
 
     @Override

@@ -10,6 +10,10 @@ import com.carpet.trencher.addition.network.track.TrackUpdatePayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 //? if <= 1.21.10 {
 import net.minecraft.resources.ResourceLocation;
@@ -68,16 +72,32 @@ public class CarpetTrencherAdditionClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(
                 TntTickingPayload.TYPE,
-                (payload, context) -> context.client().execute(
-                        () -> payload.states().forEach(ClientTntTickingManager::setState)
-                )
+                (payload, context) -> {
+                    Minecraft client = context.client();
+                    client.execute(() -> {
+                        ClientLevel level = client.level;
+                        ResourceKey<Level> dimension = payload.dimension();
+                        if (level != null && level.dimension().equals(dimension)) {
+                            payload.states().forEach((uuid, ticking) ->
+                                    ClientTntTickingManager.setState(dimension, uuid, ticking)
+                            );
+                        }
+                    });
+                }
         );
 
         ClientPlayNetworking.registerGlobalReceiver(
                 TntRemovedPayload.TYPE,
-                (payload, context) -> context.client().execute(
-                        () -> ClientTntTickingManager.remove(payload.uuid())
-                )
+                (payload, context) -> {
+                    Minecraft client = context.client();
+                    client.execute(() -> {
+                        ClientLevel level = client.level;
+                        ResourceKey<Level> dimension = payload.dimension();
+                        if (level != null && level.dimension().equals(dimension)) {
+                            ClientTntTickingManager.remove(dimension, payload.uuid());
+                        }
+                    });
+                }
         );
 
         //? if >= 1.21.6 {
@@ -99,8 +119,10 @@ public class CarpetTrencherAdditionClient implements ClientModInitializer {
         //? }
 
         ClientPlayConnectionEvents.DISCONNECT.register(
-                (handler, client) ->
-                        ClientTrackManager.clear()
+                (handler, client) -> {
+                        ClientTrackManager.clear();
+                        ClientTntTickingManager.clear();
+                }
         );
 
     }

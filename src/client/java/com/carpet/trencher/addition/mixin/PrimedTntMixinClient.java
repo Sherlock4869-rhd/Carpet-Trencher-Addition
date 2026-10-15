@@ -24,7 +24,8 @@ public abstract class PrimedTntMixinClient {
         Level level = tnt.level();
         UUID uuid = tnt.getUUID();
 
-        if(level instanceof ClientLevel && !ClientTntTickingManager.getState(uuid)) {
+        if (level instanceof ClientLevel clientLevel
+                && !ClientTntTickingManager.getState(clientLevel.dimension(), uuid)) {
             ci.cancel();
         }
     }

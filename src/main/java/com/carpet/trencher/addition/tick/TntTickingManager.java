@@ -15,38 +15,37 @@ import java.util.function.BiConsumer;
 
 public final class TntTickingManager {
 
-    private static final Map<ServerLevel, WorldState> WORLDS = new WeakHashMap<>();
+    private static final Map<ServerLevel, WorldTickState> WORLDS = new WeakHashMap<>();
 
-    private static final class WorldState {
-        private final Map<UUID, Boolean> tickedTnts = new HashMap<>();
+    private static final class WorldTickState {
+        private final Map<UUID, Boolean> pendingUpdates = new HashMap<>();
         private final Map<UUID, Boolean> cache = new HashMap<>();
     }
 
-    private TntTickingManager() {
-    }
+    private TntTickingManager() {}
 
-    private static WorldState getState(ServerLevel level) {
-        return WORLDS.computeIfAbsent(level, key -> new WorldState());
+    private static WorldTickState getState(ServerLevel level) {
+        return WORLDS.computeIfAbsent(level, key -> new WorldTickState());
     }
 
     public static void add(PrimedTnt tnt) {
         if (tnt.level() instanceof ServerLevel level) {
-            WorldState state = getState(level);
+            WorldTickState state = getState(level);
             UUID uuid = tnt.getUUID();
-            state.tickedTnts.put(uuid, false);
+            state.pendingUpdates.put(uuid, false);
             state.cache.put(uuid, false);
         }
     }
 
     public static void markTicked(PrimedTnt tnt) {
         if (tnt.level() instanceof ServerLevel level) {
-            getState(level).tickedTnts.put(tnt.getUUID(), true);
+            getState(level).pendingUpdates.put(tnt.getUUID(), true);
         }
     }
 
     public static void forEachChanged(ServerLevel level, BiConsumer<UUID, Boolean> consumer) {
-        WorldState state = getState(level);
-        state.tickedTnts.forEach((uuid, ticking) -> {
+        WorldTickState state = getState(level);
+        state.pendingUpdates.forEach((uuid, ticking) -> {
             Boolean previous = state.cache.get(uuid);
             if (previous != null && ticking != previous) {
                 consumer.accept(uuid, ticking);
@@ -56,15 +55,15 @@ public final class TntTickingManager {
     }
 
     public static void reset(ServerLevel level) {
-        WorldState state = getState(level);
-        state.tickedTnts.replaceAll((uuid, ticking) -> false);
+        WorldTickState state = getState(level);
+        state.pendingUpdates.replaceAll((uuid, ticking) -> false);
     }
 
     public static void remove(PrimedTnt tnt) {
         if (tnt.level() instanceof ServerLevel level) {
-            WorldState state = getState(level);
+            WorldTickState state = getState(level);
             UUID uuid = tnt.getUUID();
-            state.tickedTnts.remove(uuid);
+            state.pendingUpdates.remove(uuid);
             state.cache.remove(uuid);
         }
     }
@@ -77,7 +76,7 @@ public final class TntTickingManager {
 
     public static void sendRemoved(ServerLevel level, PrimedTnt tnt) {
         UUID uuid = tnt.getUUID();
-        TntRemovedPayload payload = new TntRemovedPayload(uuid);
+        TntRemovedPayload payload = new TntRemovedPayload(level.dimension(), uuid);
         for (ServerPlayer player : level.players()) {
             ServerPlayNetworking.send(player, payload);
         }

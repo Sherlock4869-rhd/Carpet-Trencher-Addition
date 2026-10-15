@@ -3,6 +3,7 @@ package com.carpet.trencher.addition.commands.track;
 import com.carpet.trencher.addition.network.track.TrackUpdatePayload;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.PrimedTnt;
 
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.vehicle.minecart.MinecartHopper;
 */
 //? }
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +44,7 @@ public final class TrackState {
 
         @SuppressWarnings("unchecked")
         public void encode(RegistryFriendlyByteBuf buf, Object value) {
-            ((StreamCodec<RegistryFriendlyByteBuf, Object>) codec)
-                    .encode(buf, value);
+            ((StreamCodec<RegistryFriendlyByteBuf, Object>) codec).encode(buf, value);
         }
 
         public Object decode(RegistryFriendlyByteBuf buf) {
@@ -105,10 +106,10 @@ public final class TrackState {
         states.put(Type.ID, entity.getId());
 
         //? if <= 1.21.11 {
-        states.put(Type.TAGS, entity.getTags());
+        states.put(Type.TAGS, new HashSet<>(entity.getTags()));
         //? } else {
         /*
-        states.put(Type.TAGS, entity.entityTags());
+        states.put(Type.TAGS, new HashSet<>(entity.entityTags()));
         */
         //? }
 
@@ -122,10 +123,13 @@ public final class TrackState {
         }
 
         if (entity instanceof AbstractMinecartContainer minecartContainer) {
-            states.put(Type.ITEMS,
+            states.put(
+                    Type.ITEMS,
                     minecartContainer.getItemStacks().stream()
                             .filter(stack -> !stack.isEmpty())
-                            .toList());
+                            .map(ItemStack::copy)
+                            .toList()
+            );
             if (entity instanceof MinecartHopper minecartHopper) {
                 states.put(Type.ENABLED, minecartHopper.isEnabled());
             }

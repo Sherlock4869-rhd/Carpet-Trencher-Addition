@@ -62,7 +62,7 @@ public class ServerLevelMixin {
         ServerLevel level = (ServerLevel) (Object) this;
         Map<UUID, Boolean> states = new HashMap<>();
         TntTickingManager.forEachChanged(level, states::put);
-        TntTickingPayload payload = new TntTickingPayload(states);
+        TntTickingPayload payload = new TntTickingPayload(level.dimension(), states);
         if (!states.isEmpty()) {
             TntTickingManager.sendTickingState(level, payload);
         }
