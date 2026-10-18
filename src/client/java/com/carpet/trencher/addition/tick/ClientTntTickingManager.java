@@ -10,7 +10,6 @@ import java.util.UUID;
 public final class ClientTntTickingManager {
 
     private static final Map<ResourceKey<Level>, Map<UUID, Boolean>> WORLDS = new HashMap<>();
-
     private ClientTntTickingManager() {}
 
     public static void setState(ResourceKey<Level> dimension, UUID uuid, boolean ticking) {

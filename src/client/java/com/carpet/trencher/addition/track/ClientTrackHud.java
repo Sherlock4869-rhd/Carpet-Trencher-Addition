@@ -43,9 +43,9 @@ public final class ClientTrackHud {
         int y = 10;
 
         int index = 1;
-        for (UUID uuid : ClientTrackManager.trackOrder) {
+        for (UUID uuid : ClientTrackManager.getTrackOrder()) {
 
-            Map<TrackState.Type, Object> states = ClientTrackManager.trackedEntities.get(uuid);
+            Map<TrackState.Type, Object> states = ClientTrackManager.getStates(uuid);
             Minecraft minecraft = Minecraft.getInstance();
 
             if (states == null) {
@@ -53,10 +53,7 @@ public final class ClientTrackHud {
             }
 
             //? if >= 1.21.5 {
-            Entity entity =
-                    minecraft.level != null
-                            ? ClientTrackManager.getEntity(uuid)
-                            : null;
+            Entity entity = minecraft.level != null ? ClientTrackManager.getEntity(uuid) : null;
             //? } else {
             /*
             Object id = states.get(TrackState.Type.ID);
@@ -67,17 +64,16 @@ public final class ClientTrackHud {
             */
             //? }
 
+            int color = ClientTrackManager.getColor(uuid);
             if (entity != null) {
                 drawString(
                         graphics,
                         entity.getType().toString()
                                 .replace("entity.minecraft.", index + ". minecraft:"),
-                        x,
-                        y,
-                        ClientTrackManager.entitiesColor.get(uuid)
+                        x, y, color
                 );
             } else {
-                drawString(graphics, index + ".Unknown", x, y, ClientTrackManager.entitiesColor.get(uuid));
+                drawString(graphics, index + ".Unknown", x, y, color);
             }
             index++;
             y += 12;

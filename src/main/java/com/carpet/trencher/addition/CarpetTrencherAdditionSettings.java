@@ -37,5 +37,16 @@ public class CarpetTrencherAdditionSettings {
     @Rule(
             categories = {CTA, TNT, OPTIMIZATION}
     )
-    public static boolean optimizedTntPushEntity = false;
+    public static boolean optimizeTntPushEntity = false;
+
+    @Rule(
+            categories = {CTA, TNT, OPTIMIZATION}
+    )
+    public static boolean optimizeExplosionItems = false;
+
+    @Rule(
+            categories = {CTA, FEATURE}
+    )
+    public static boolean anvilWallProtection = false;
+
 }

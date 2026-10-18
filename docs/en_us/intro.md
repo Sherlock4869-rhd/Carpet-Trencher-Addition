@@ -6,16 +6,6 @@
 
 **Tip: Use `Ctrl+F` to quickly find the rule you need**
 
-### Explosion Ray Initial Strength (explosionRayInit)
-
-&emsp;Fixed multiplier for explosion ray initial strength. Range: 0 to 16 (vanilla default is a random value between 0.7 and 1.3). Set to any value outside this range to use vanilla behavior
-
-&emsp;- Type: `double`
-&emsp;- Default: `-1.0`
-&emsp;- Category: `CTA`, `FEATURE`
-
----
-
 ### Disable Amethyst Bud Growth in Water (`disableAmethystWaterGrowth`)
 
 Prevents amethyst buds from growing into full water blocks.
@@ -26,9 +16,53 @@ Prevents amethyst buds from growing into full water blocks.
 
 ---
 
-### Optimize Explosion Entity Pushing (optimizedTntPushEntity)
+### Water Wall Lava Protection (`waterWallLavaProtection`)
+
+Prevents lava from generating cobblestone/obsidian when a waterlogged stair (bottom face exposed) is present 1 or 2 blocks above.
+
+&emsp;- Type: `boolean`
+&emsp;- Default value: `false`
+&emsp;- Categories: `CTA`, `FEATURE`
+
+---
+
+### Anvil Wall Protection (`anvilWallProtection`)
+
+&emsp;Prevents anvil walls from falling.
+
+&emsp;- Type: `boolean`
+
+&emsp;- Default value: `false`
+
+&emsp;- Categories: `CTA`, `FEATURE`
+
+---
+
+### Explosion Ray Initial Strength (`explosionRayInit`)
+
+&emsp;Fixed multiplier for explosion ray initial strength. Range: 0 to 16 (vanilla default is a random value between 0.7 and 1.3). Set to any value outside this range to use vanilla behavior
+
+&emsp;- Type: `double`
+&emsp;- Default: `-1.0`
+&emsp;- Category: `CTA`, `FEATURE`
+
+---
+
+### Optimize Explosion Entity Pushing (`optimizeTntPushEntity`)
 
 Optimizes explosion calculations for large numbers of overlapping TNT and living entities
+
+- Type: `boolean`
+
+- Default: `false`
+
+- Categories: `CTA`, `TNT`, `OPTIMIZATION`
+
+---
+
+### Optimize Explosion Items Drop (`optimizeExplosionItems`)
+
+Optimizes the item merging process when explosions generate large amounts of item drops
 
 - Type: `boolean`
 
@@ -59,15 +93,7 @@ The value must be between `-0.02` and `0.02`. Set it to `-1` to use the vanilla 
 
 ---
 
-### Water Wall Lava Protection (`waterWallLavaProtection`)
 
-Prevents lava from generating cobblestone/obsidian when a waterlogged stair (bottom face exposed) is present 1 or 2 blocks above.
-
-&emsp;- Type: `boolean`
-&emsp;- Default value: `false`
-&emsp;- Categories: `CTA`, `FEATURE`
-
----
 
 ## Information Display
 

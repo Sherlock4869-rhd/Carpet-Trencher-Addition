@@ -1,29 +1,21 @@
 package com.carpet.trencher.addition.mixin;
 
 import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
-import com.carpet.trencher.addition.rules.optimizedTnt.TntPushCache;
-import com.carpet.trencher.addition.rules.optimizedTnt.LivingEntityPushCache;
+import com.carpet.trencher.addition.helper.ServerExposion.ServerExplosionAccess;
+import com.carpet.trencher.addition.helper.ServerExposion.ServerExplosionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -35,20 +27,13 @@ import java.util.*;
 import net.minecraft.world.level.ServerExplosion;
 //? } else {
 /*
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.util.RandomSource;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-*/
-//? }
-
-//? if <= 1.21.10 {
-import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
-//? } else {
-/*
-import net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.AbstractWindCharge;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 */
 //? }
 
@@ -60,7 +45,7 @@ import net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.Abstra
 @Mixin(ServerExplosion.class)
 //? }
 
-public abstract class ServerExplosionMixin {
+public abstract class ServerExplosionMixin implements ServerExplosionAccess {
 
     @Shadow @Final private float radius;
     @Shadow @Final private ExplosionDamageCalculator damageCalculator;
@@ -77,8 +62,13 @@ public abstract class ServerExplosionMixin {
     @Shadow @Final private double x;
     @Shadow @Final private double y;
     @Shadow @Final private double z;
+    @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
+    @Shadow @Final private boolean fire;
+    @Shadow @Final private RandomSource random;
     */
     //? }
+
+
 
     //? if >= 1.21.2 {
     @Inject(
@@ -125,20 +115,20 @@ public abstract class ServerExplosionMixin {
 
                             Explosion explosion = (Explosion) this;
 
-                            Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(explosion, this.level, blockPos, blockState, fluidState);
+                            Optional<Float> optional =
+                                    this.damageCalculator.getBlockExplosionResistance(
+                                            explosion, this.level, blockPos, blockState, fluidState
+                                    );
                             if (optional.isPresent()) {
                                 h -= (optional.get() + 0.3F) * 0.3F;
                             }
-
                             if (h > 0.0F && this.damageCalculator.shouldBlockExplode(explosion, this.level, blockPos, blockState, h)) {
                                 set.add(blockPos);
                             }
-
                             m += d * 0.3F;
                             n += e * 0.3F;
                             o += f * 0.3F;
                             h -= 0.22500001F;
-
                         }
                     }
                 }
@@ -153,10 +143,27 @@ public abstract class ServerExplosionMixin {
             cancellable = true
     )
     private void optimizedTntEntityPush(CallbackInfo ci) {
-        if (!CarpetTrencherAdditionSettings.optimizedTntPushEntity) {
+        if (!CarpetTrencherAdditionSettings.optimizeTntPushEntity) {
             return;
         }
-        optimizer();
+        new ServerExplosionHelper(this).optimizer();
+        ci.cancel();
+    }
+
+    @Inject(
+            method = "interactWithBlocks",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/Util;shuffle(Ljava/util/List;Lnet/minecraft/util/RandomSource;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void optimizeItemMerge (List<BlockPos> list, CallbackInfo ci) {
+        if (!CarpetTrencherAdditionSettings.optimizeExplosionItems) {
+            return;
+        }
+        new ServerExplosionHelper(this).optimizeItemMerge(list);
         ci.cancel();
     }
     //? } else {
@@ -186,286 +193,103 @@ public abstract class ServerExplosionMixin {
             cancellable = true
     )
     private void optimizedTntEntityPush(CallbackInfo ci) {
-        if (!CarpetTrencherAdditionSettings.optimizedTntPushEntity) {
+        if (!CarpetTrencherAdditionSettings.optimizeTntPushEntity) {
             return;
         }
-        optimizer();
+        new ServerExplosionHelper(this).optimizer();
         ci.cancel();
+    }
+
+    @Inject(
+            method = "finalizeExplosion",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/Util;shuffle(Ljava/util/List;Lnet/minecraft/util/RandomSource;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void optimizeItemMerge(boolean particles, CallbackInfo ci) {
+        if (!CarpetTrencherAdditionSettings.optimizeExplosionItems) {
+            return;
+        }
+        new ServerExplosionHelper(this).optimizeItemMerge(this.toBlow);
+        if (this.fire) {
+            for (BlockPos blockPos : this.toBlow) {
+                if (this.random.nextInt(3) == 0
+                        && this.level.getBlockState(blockPos).isAir()
+                        && this.level.getBlockState(blockPos.below())
+                        .isSolidRender(this.level, blockPos.below())) {
+                    this.level.setBlockAndUpdate(
+                            blockPos,
+                            BaseFireBlock.getState(this.level, blockPos)
+                    );
+                }
+            }
+        }
+        ci.cancel();
+    }
+
+    */
+    //? }
+
+    @Override
+    public float cta$getRadius() {
+        return this.radius;
+    }
+
+    @Override
+    public ExplosionDamageCalculator cta$getDamageCalculator() {
+        return this.damageCalculator;
+    }
+
+    @Override
+    public Entity cta$getSource() {
+        return this.source;
+    }
+
+    @Override
+    public DamageSource cta$getDamageSource() {
+        return this.damageSource;
+    }
+
+    @Override
+    public Map<Player, Vec3> cta$getHitPlayers() {
+        return this.hitPlayers;
+    }
+
+    //? if >= 1.21.2 {
+    @Override
+    public ServerLevel cta$getLevel() {
+        return this.level;
+    }
+
+    @Override
+    public Vec3 cta$getCenter() {
+        return this.center;
+    }
+    //? } else {
+    /*
+    @Override
+    public Level cta$getLevel() {
+        return this.level;
+    }
+
+    @Override
+    public double cta$getCenterX() {
+        return this.x;
+    }
+
+    @Override
+    public double cta$getCenterY() {
+        return this.y;
+    }
+
+    @Override
+    public double cta$getCenterZ() {
+        return this.z;
     }
     */
     //? }
 
-    @Unique
-    private void optimizer() {
-
-        if (this.radius < 1.0E-5F) {
-            return;
-        }
-
-        Vec3 center = getExplosionCenter();
-        float radius = this.radius * 2.0F;
-        int x0 = Mth.floor(center.x - radius - 1.0);
-        int x1 = Mth.floor(center.x + radius + 1.0);
-        int y0 = Mth.floor(center.y - radius - 1.0);
-        int y1 = Mth.floor(center.y + radius + 1.0);
-        int z0 = Mth.floor(center.z - radius - 1.0);
-        int z1 = Mth.floor(center.z + radius + 1.0);
-
-        TntPushCache tntPushCache = new TntPushCache();
-        TntPushCache windChargePushCache = new TntPushCache();
-        LivingEntityPushCache livingEntityPushCache = new LivingEntityPushCache();
-
-        for (Entity entity : level.getEntities(this.source, new AABB( x0, y0, z0, x1, y1, z1))) {
-
-            if (ignoreExplosion(entity)) {
-                continue;
-            }
-
-            double distance = Math.sqrt(entity.distanceToSqr(center)) / radius;
-
-            if (distance > 1.0) {
-                continue;
-            }
-
-            switch (entity) {
-                case PrimedTnt tnt ->
-                        optimizeTnt(tnt, distance, center, tntPushCache);
-                case AbstractWindCharge abstractWindCharge ->
-                        optimizeProjectile(abstractWindCharge, distance, center, windChargePushCache);
-                case LivingEntity livingEntity when !(entity instanceof Player) ->
-                        optimizeLivingEntity(livingEntity, distance, center, livingEntityPushCache);
-                default ->
-                        optimizeEntity(entity, distance, center);
-            }
-        }
-    }
-
-    @Unique
-    private void optimizeTnt(
-            PrimedTnt tnt,
-            double distance,
-            Vec3 center,
-            TntPushCache tntPushCache
-    ) {
-        Vec3 position = tnt.position();
-        Vec3 push = tntPushCache.get(position);
-        if (push == null) {
-            Vec3 direction = position.subtract(center).normalize();
-            float multiplier = this.damageCalculator.getKnockbackMultiplier(tnt);
-            float exposure = getSeenPercent(center, tnt);
-            double power = (1.0 - distance) * exposure * multiplier;
-            push = direction.scale(power);
-            tntPushCache.put(position, push);
-        }
-        applyKnockback(tnt, push);
-        tnt.onExplosionHit(this.source);
-    }
-
-    @Unique
-    private void optimizeProjectile(
-            Projectile projectile,
-            double distance,
-            Vec3 center,
-            TntPushCache windChargePushCache
-    ) {
-        Vec3 position = projectile.position();
-        Vec3 push = windChargePushCache.get(position);
-
-        if (push == null) {
-            Vec3 direction = position.subtract(center).normalize();
-            float multiplier = this.damageCalculator.getKnockbackMultiplier(projectile);
-            float exposure = getSeenPercent(center, projectile);
-            double power = (1.0 - distance) * exposure * multiplier;
-            push = direction.scale(power);
-            windChargePushCache.put(position, push);
-        }
-        applyKnockback(projectile, push);
-        handlePostKnockback(projectile, push);
-        projectile.onExplosionHit(this.source);
-    }
-
-    @Unique
-    private void optimizeLivingEntity(
-            LivingEntity livingEntity,
-            double distance,
-            Vec3 center,
-            LivingEntityPushCache livingEntityPushCache
-    ) {
-
-        LivingEntityPushCache.CacheValue value = livingEntityPushCache.get(livingEntity);
-
-        if (value == null) {
-            value = calculateExplosionResult(livingEntity, distance, center);
-            livingEntityPushCache.put(livingEntity, value);
-        }
-
-        float damage = value.damage();
-        Vec3 push = value.push();
-
-        if (damage > 0.0F) {
-            damageEntity(livingEntity, damage);
-        }
-
-        applyKnockback(livingEntity, push);
-        livingEntity.onExplosionHit(this.source);
-
-    }
-
-    @Unique
-    private void optimizeEntity(Entity entity, double distance, Vec3 center) {
-
-        LivingEntityPushCache.CacheValue value = calculateExplosionResult(entity, distance, center);
-
-        if (value.damage() > 0.0F) {
-            damageEntity(entity, value.damage());
-        }
-
-        applyKnockback(entity, value.push());
-        handlePostKnockback(entity, value.push());
-        entity.onExplosionHit(this.source);
-
-    }
-
-    @Unique
-    private LivingEntityPushCache.CacheValue calculateExplosionResult(Entity entity, double distance, Vec3 center) {
-        Vec3 entityOrigin = entity.getEyePosition();
-        Vec3 direction = entityOrigin.subtract(center).normalize();
-
-        boolean shouldDamage = shouldDamageEntity(entity);
-        float multiplier = this.damageCalculator.getKnockbackMultiplier(entity);
-
-        float exposure = !shouldDamage && multiplier == 0.0F
-                ? 0.0F
-                : getSeenPercent(center, entity);
-
-        float damage = shouldDamage
-                ? getEntityDamageAmount(entity, exposure)
-                : 0.0F;
-
-        double knockbackResistance = entity instanceof LivingEntity livingEntity
-                ? livingEntity.getAttributeValue(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE)
-                : 0.0;
-
-        double knockbackPower = (1.0 - distance) * exposure * multiplier * (1.0 - knockbackResistance);
-
-        Vec3 push = direction.scale(knockbackPower);
-
-        return new LivingEntityPushCache.CacheValue(push, damage);
-    }
-
-    @Unique
-    private Vec3 getExplosionCenter() {
-        //? if >= 1.21.2 {
-        return this.center;
-        //? } else {
-        /*
-        return new Vec3(this.x, this.y, this.z);
-        */
-        //? }
-    }
-
-    @Unique
-    private boolean ignoreExplosion(Entity entity) {
-        //? if >= 1.21.2 {
-        return entity.ignoreExplosion((ServerExplosion) (Object) this);
-        //? } else {
-        /*
-        return entity.ignoreExplosion((Explosion) (Object) this);
-        */
-        //? }
-    }
-
-    @Unique
-    private float getSeenPercent(Vec3 center, Entity entity) {
-        //? if >= 1.21.2 {
-        return ServerExplosion.getSeenPercent(center, entity);
-        //? } else {
-        /*
-        return Explosion.getSeenPercent(center, entity);
-        */
-        //? }
-    }
-
-    @Unique
-    private boolean shouldDamageEntity(Entity entity) {
-        //? if >= 1.21.2 {
-        return this.damageCalculator.shouldDamageEntity((ServerExplosion) (Object) this, entity);
-        //? } else {
-        /*
-        return this.damageCalculator.shouldDamageEntity((Explosion) (Object) this,entity);
-        */
-        //? }
-    }
-
-    @Unique
-    private float getEntityDamageAmount(Entity entity, float exposure) {
-        //? if >= 1.21.2 {
-        return this.damageCalculator.getEntityDamageAmount((ServerExplosion) (Object) this, entity, exposure);
-        //? } else {
-        /*
-        return this.damageCalculator.getEntityDamageAmount((Explosion) (Object) this,entity);
-        */
-        //? }
-    }
-
-    @Unique
-    private void damageEntity(Entity entity, float damage) {
-        //? if >= 1.21.2 {
-        entity.hurtServer(this.level, this.damageSource, damage
-        );
-        //? } else {
-        /*
-        entity.hurt(this.damageSource, damage);
-        */
-        //? }
-    }
-
-    @Unique
-    private void applyKnockback(Entity entity, Vec3 knockback) {
-        //? if >= 1.21.2 {
-        entity.push(knockback);
-        //? } else {
-        /*
-        entity.setDeltaMovement(entity.getDeltaMovement().add(knockback));
-        */
-        //? }
-    }
-
-    @Unique
-    private void handlePostKnockback(Entity entity, Vec3 knockback) {
-
-        //? if >= 1.21.2 {
-        if (isRedirectableProjectile(entity) && entity instanceof Projectile projectile) {
-            projectile.setOwner(this.damageSource.getEntity());
-        } else if (
-                entity instanceof Player player
-                        && !player.isSpectator()
-                        && (!player.isCreative() || player.getAbilities().flying)
-        ) {
-            this.hitPlayers.put(player, knockback);
-        }
-
-        //? } else {
-        /*
-        if (
-                entity instanceof Player player
-                && !player.isSpectator()
-                && (!player.isCreative() || player.getAbilities().flying)
-        ) {
-            this.hitPlayers.put(player, knockback);
-        }
-        */
-        //? }
-    }
-
-    @Unique
-    private boolean isRedirectableProjectile(Entity entity) {
-        //? if <= 1.21.11 {
-        return entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE);
-        //? } else {
-        /*
-        return entity.is(EntityTypeTags.REDIRECTABLE_PROJECTILE);
-        */
-        //? }
-    }
 }

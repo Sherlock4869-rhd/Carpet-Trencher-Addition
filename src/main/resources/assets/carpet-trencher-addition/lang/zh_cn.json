@@ -16,6 +16,12 @@
   "carpet.rule.explosionRayInit.name": "设定爆炸射线初值",
   "carpet.rule.explosionRayInit.desc": "固定设置爆炸射线初始强度随机乘数，范围为0到50之间(原版默认为0.7到1.3之间的随机值)，设为其余值即为原版默认情况",
 
-  "carpet.rule.optimizedTntPushEntity.name": "优化爆炸推进实体",
-  "carpet.rule.optimizedTntPushEntity.desc": "优化了爆炸对大量重叠TNT以及生物实体的计算"
+  "carpet.rule.optimizeTntPushEntity.name": "优化爆炸推进实体",
+  "carpet.rule.optimizeTntPushEntity.desc": "优化了爆炸对大量重叠TNT以及生物实体的计算",
+
+  "carpet.rule.optimizeExplosionItems.name": "优化爆炸生成掉落物",
+  "carpet.rule.optimizeExplosionItems.desc": "优化了爆炸生成大量掉落物时的合并流程",
+
+  "carpet.rule.anvilWallProtection.name": "铁砧墙保护",
+  "carpet.rule.anvilWallProtection.desc": "阻止铁砧墙铁砧下落"
 }

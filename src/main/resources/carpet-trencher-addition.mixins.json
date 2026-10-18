@@ -8,7 +8,8 @@
 		"LiquidBlockMixin",
 		"ServerExplosionMixin",
 		"EntityMixin",
-		"ServerLevelMixin"
+		"ServerLevelMixin",
+		"FallingBlockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

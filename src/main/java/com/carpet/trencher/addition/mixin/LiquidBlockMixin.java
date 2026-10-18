@@ -41,4 +41,5 @@ public abstract class LiquidBlockMixin {
                 && state.getValue(StairBlock.HALF) == Half.BOTTOM
                 && state.getFluidState().is(FluidTags.WATER);
     }
+
 }

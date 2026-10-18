@@ -9,9 +9,9 @@ import java.util.*;
 
 public class ClientTrackManager {
 
-    public static final Map<UUID, Map<TrackState.Type, Object>> trackedEntities = new LinkedHashMap<>();
-    public static final Set<UUID> trackOrder = new LinkedHashSet<>();
-    public static final Map<UUID, Integer> entitiesColor = new HashMap<>();
+    private static final Map<UUID, Map<TrackState.Type, Object>> trackedEntities = new LinkedHashMap<>();
+    private static final Set<UUID> trackOrder = new LinkedHashSet<>();
+    private static final Map<UUID, Integer> entitiesColor = new HashMap<>();
 
     private ClientTrackManager() {}
 
@@ -79,6 +79,30 @@ public class ClientTrackManager {
             return null;
         }
         return minecraft.level.getEntity(entityId);
+    }
+    */
+    //? }
+
+    public static Map<TrackState.Type, Object> getStates(UUID uuid) {
+        return trackedEntities.get(uuid);
+    }
+
+    public static Set<UUID> getTrackOrder() {
+        return Set.copyOf(trackOrder);
+    }
+
+    public static boolean hasColor(UUID uuid) {
+        return entitiesColor.containsKey(uuid);
+    }
+
+    public static int getColor(UUID uuid) {
+        return entitiesColor.get(uuid);
+    }
+
+    //? if <= 1.21.8 {
+    /*
+    public static int getColor(UUID uuid, int defaultColor) {
+        return entitiesColor.getOrDefault(uuid, defaultColor);
     }
     */
     //? }

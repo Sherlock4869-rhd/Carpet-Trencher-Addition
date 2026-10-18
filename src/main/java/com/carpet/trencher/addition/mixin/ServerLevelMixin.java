@@ -24,11 +24,11 @@ public class ServerLevelMixin {
     private void getState(Entity entity, CallbackInfo ci) {
         boolean tracked = ((EntityTrackingAccess) entity).cta$isTracked();
         if (tracked) {
-            if (!TrackManager.entityTrackers.containsKey(entity.getUUID())) {
-                ((EntityTrackingAccess) entity).cta$setTracked(false);
+            if (TrackManager.hasTracker(entity)) {
+                TrackManager.updateTracking(entity);
             }
             else {
-                TrackManager.updateTracking(entity);
+                ((EntityTrackingAccess) entity).cta$setTracked(false);
             }
         }
     }
@@ -40,11 +40,11 @@ public class ServerLevelMixin {
     private void getPassengerState(Entity entity, Entity entity2, CallbackInfo ci) {
         boolean tracked = ((EntityTrackingAccess) entity2).cta$isTracked();
         if (tracked) {
-            if (!TrackManager.entityTrackers.containsKey(entity2.getUUID())) {
-                ((EntityTrackingAccess) entity2).cta$setTracked(false);
+            if (TrackManager.hasTracker(entity2)) {
+                TrackManager.updateTracking(entity2);
             }
             else {
-                TrackManager.updateTracking(entity2);
+                ((EntityTrackingAccess) entity2).cta$setTracked(false);
             }
         }
     }
@@ -66,8 +66,8 @@ public class ServerLevelMixin {
         if (!states.isEmpty()) {
             TntTickingManager.sendTickingState(level, payload);
         }
-        TntTickingManager.reset(level);
 
+        TntTickingManager.reset(level);
         if (level.getServer() != null) {
             TrackManager.flushUpdates(level);
         }

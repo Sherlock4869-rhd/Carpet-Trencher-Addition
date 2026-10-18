@@ -18,8 +18,8 @@ public class TrackManager {
 
     private static final Map<UUID, Map<TrackState.Type, Object>> cache = new HashMap<>();
     private static final Map<UUID, Map<UUID, Map<TrackState.Type, Object>>> pendingUpdates = new HashMap<>();
-    public static final Map<UUID, Map<UUID, Component>> playerTrackedEntities = new HashMap<>();
-    public static final Map<UUID, Set<UUID>> entityTrackers = new HashMap<>();
+    private static final Map<UUID, Map<UUID, Component>> playerTrackedEntities = new HashMap<>();
+    private static final Map<UUID, Set<UUID>> entityTrackers = new HashMap<>();
 
     public static void startTracking(ServerPlayer tracker, Collection<? extends Entity> entities) {
         UUID trackerUuid = tracker.getUUID();
@@ -273,4 +273,13 @@ public class TrackManager {
             }
         }
     }
+
+    public static boolean hasTracker(UUID uuid) {
+        return entityTrackers.containsKey(uuid);
+    }
+
+    public static boolean hasTracker(Entity entity) {
+        return hasTracker(entity.getUUID());
+    }
+
 }

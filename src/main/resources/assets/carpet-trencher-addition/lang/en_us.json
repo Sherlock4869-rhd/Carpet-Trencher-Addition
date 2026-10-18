@@ -16,6 +16,12 @@
   "carpet.rule.explosionRayInit.name": "Set Explosion Ray Initial Value",
   "carpet.rule.explosionRayInit.desc": "Fixed multiplier for explosion ray initial strength. Range: 0 to 50 (vanilla default is a random value between 0.7 and 1.3). Set to any value outside this range to use vanilla behavior",
 
-  "carpet.rule.optimizedTntPushEntity.name": "Optimized Explosion Entity Pushing",
-  "carpet.rule.optimizedTntPushEntity.desc": "Optimizes explosion calculations for large numbers of overlapping TNT and living entities"
+  "carpet.rule.optimizeTntPushEntity.name": "Optimized Explosion Entity Pushing",
+  "carpet.rule.optimizeTntPushEntity.desc": "Optimizes explosion calculations for large numbers of overlapping TNT and living entities",
+
+  "carpet.rule.optimizeExplosionItems.name": "Optimize Explosion Items Drop",
+  "carpet.rule.optimizeExplosionItems.desc": "Optimizes the item merging process when explosions generate large amounts of item drops",
+
+  "carpet.rule.anvilWallProtection.name": "Anvil Wall Protection",
+  "carpet.rule.anvilWallProtection.desc": "Prevent anvils in an anvil wall from falling"
 }

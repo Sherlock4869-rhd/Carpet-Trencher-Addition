@@ -37,12 +37,12 @@ public abstract class LevelRendererMixin {
             at = @At("RETURN")
     )
     private void setTrackedEntityOutline(Entity entity, float partialTick, CallbackInfoReturnable<EntityRenderState> cir) {
-        UUID entityUuid = entity.getUUID();
-        if (!ClientTrackManager.entitiesColor.containsKey(entityUuid)) {
+        UUID uuid = entity.getUUID();
+        if (!ClientTrackManager.hasColor(uuid)) {
             return;
         }
         EntityRenderState state = cir.getReturnValue();
-        state.outlineColor = ClientTrackManager.entitiesColor.get(entityUuid);
+        state.outlineColor = ClientTrackManager.getColor(uuid);
     }
     //? } elif >= 26.2 {
     /*
@@ -51,9 +51,9 @@ public abstract class LevelRendererMixin {
             at = @At("TAIL")
     )
     private void setTrackedEntityOutline(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
-        UUID entityUuid = entity.getUUID();
-        if (ClientTrackManager.isTracked(entityUuid)) {
-            state.outlineColor = ClientTrackManager.entitiesColor.get(entityUuid);
+        UUID uuid = entity.getUUID();
+        if (ClientTrackManager.isTracked(uuid)) {
+            state.outlineColor = ClientTrackManager.getColor(uuid);
         }
     }
     */
@@ -67,7 +67,7 @@ public abstract class LevelRendererMixin {
             )
     )
     private boolean shouldRenderTrackedOutline(boolean original, @Local Entity entity) {
-        return original || ClientTrackManager.entitiesColor.containsKey(entity.getUUID());
+        return original || ClientTrackManager.hasColor(entity.getUUID());
     }
 
     @ModifyExpressionValue(
@@ -78,7 +78,7 @@ public abstract class LevelRendererMixin {
             )
     )
     private boolean shouldRenderTrackedOutlineInRender(boolean original, @Local Entity entity) {
-        return original || ClientTrackManager.entitiesColor.containsKey(entity.getUUID());
+        return original || ClientTrackManager.hasColor(entity.getUUID());
     }
 
     @ModifyExpressionValue(
@@ -89,7 +89,7 @@ public abstract class LevelRendererMixin {
             )
     )
     private int getTrackedOutlineColor(int original, @Local Entity entity) {
-        return ClientTrackManager.entitiesColor.getOrDefault(entity.getUUID(), original);
+        return ClientTrackManager.getColor(entity.getUUID(), original);
     }
     */
     //? } else {
@@ -102,7 +102,7 @@ public abstract class LevelRendererMixin {
             )
     )
     private boolean shouldRenderTrackedOutline(boolean original, @Local Entity entity) {
-        return original || ClientTrackManager.entitiesColor.containsKey(entity.getUUID());
+        return original || ClientTrackManager.hasColor(entity.getUUID());
     }
 
     @ModifyExpressionValue(
@@ -113,7 +113,7 @@ public abstract class LevelRendererMixin {
             )
     )
     private int getTrackedOutlineColor(int original, @Local Entity entity) {
-        return ClientTrackManager.entitiesColor.getOrDefault(entity.getUUID(), original);
+        return ClientTrackManager.getColor(entity.getUUID(), original);
     }
     */
     //? }
