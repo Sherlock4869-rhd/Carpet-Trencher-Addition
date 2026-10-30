@@ -29,7 +29,6 @@ public abstract class LiquidBlockMixin {
         if (!blockState.getFluidState().is(FluidTags.LAVA)) {
             return;
         }
-
         if (isValidWaterloggedStair(level.getBlockState(blockPos.above())) || isValidWaterloggedStair(level.getBlockState(blockPos.above(2)))) {
             cir.setReturnValue(true);
         }

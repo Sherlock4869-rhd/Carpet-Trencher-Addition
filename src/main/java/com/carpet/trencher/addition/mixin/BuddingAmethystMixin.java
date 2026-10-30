@@ -17,8 +17,7 @@ public abstract class BuddingAmethystMixin {
             cancellable = true
     )
     private static void onCanClusterGrowAtState(BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetTrencherAdditionSettings.disableAmethystWaterGrowth
-                && blockState.is(Blocks.WATER)) {
+        if (CarpetTrencherAdditionSettings.disableAmethystWaterGrowth && blockState.is(Blocks.WATER)) {
             cir.setReturnValue(false);
         }
     }

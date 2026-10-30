@@ -3,8 +3,10 @@ package com.carpet.trencher.addition.mixin;
 import com.carpet.trencher.addition.CarpetTrencherAdditionSettings;
 import com.carpet.trencher.addition.helper.ServerExposion.ServerExplosionAccess;
 import com.carpet.trencher.addition.helper.ServerExposion.ServerExplosionHelper;
+import com.carpet.trencher.addition.utils.RandomSourceUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +24,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
+
+//? if <= 1.21.10 {
+import net.minecraft.Util;
+//? } else {
+/*
+import net.minecraft.util.Util;
+*/
+//? }
 
 //? if >= 1.21.2 {
 import net.minecraft.world.level.ServerExplosion;
@@ -67,8 +77,6 @@ public abstract class ServerExplosionMixin implements ServerExplosionAccess {
     @Shadow @Final private RandomSource random;
     */
     //? }
-
-
 
     //? if >= 1.21.2 {
     @Inject(
@@ -143,28 +151,26 @@ public abstract class ServerExplosionMixin implements ServerExplosionAccess {
             cancellable = true
     )
     private void optimizedTntEntityPush(CallbackInfo ci) {
-        if (!CarpetTrencherAdditionSettings.optimizeTntPushEntity) {
-            return;
+        if (CarpetTrencherAdditionSettings.optimizeTntPushEntity) {
+            new ServerExplosionHelper(this).optimizer();
+            ci.cancel();
         }
-        new ServerExplosionHelper(this).optimizer();
-        ci.cancel();
+
     }
 
     @Inject(
             method = "interactWithBlocks",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/Util;shuffle(Ljava/util/List;Lnet/minecraft/util/RandomSource;)V",
-                    shift = At.Shift.AFTER
-            ),
+            at = @At("HEAD"),
             cancellable = true
     )
     private void optimizeItemMerge (List<BlockPos> list, CallbackInfo ci) {
-        if (!CarpetTrencherAdditionSettings.optimizeExplosionItems) {
-            return;
+        if (CarpetTrencherAdditionSettings.optimizeExplosionItems) {
+            RandomSource random = RandomSourceUtils.getRandom(this.level);
+            Util.shuffle(list, random);
+            new ServerExplosionHelper(this).optimizeItemMerge(list);
+            ci.cancel();
         }
-        new ServerExplosionHelper(this).optimizeItemMerge(list);
-        ci.cancel();
+
     }
     //? } else {
     /*
@@ -192,7 +198,10 @@ public abstract class ServerExplosionMixin implements ServerExplosionAccess {
             ),
             cancellable = true
     )
-    private void optimizedTntEntityPush(CallbackInfo ci) {
+    private void optimizeTntPushEntity(CallbackInfo ci) {
+        if (level.isClientSide()) {
+            return;
+        }
         if (!CarpetTrencherAdditionSettings.optimizeTntPushEntity) {
             return;
         }
@@ -203,9 +212,9 @@ public abstract class ServerExplosionMixin implements ServerExplosionAccess {
     @Inject(
             method = "finalizeExplosion",
             at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/Util;shuffle(Ljava/util/List;Lnet/minecraft/util/RandomSource;)V",
-                    shift = At.Shift.AFTER
+                    value = "NEW",
+                    target = "java/util/ArrayList",
+                    ordinal = 0
             ),
             cancellable = true
     )
@@ -213,6 +222,10 @@ public abstract class ServerExplosionMixin implements ServerExplosionAccess {
         if (!CarpetTrencherAdditionSettings.optimizeExplosionItems) {
             return;
         }
+        if (level.isClientSide()) {
+            return;
+        }
+        Util.shuffle(toBlow, random);
         new ServerExplosionHelper(this).optimizeItemMerge(this.toBlow);
         if (this.fire) {
             for (BlockPos blockPos : this.toBlow) {

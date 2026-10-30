@@ -23,5 +23,8 @@
   "carpet.rule.optimizeExplosionItems.desc": "Optimizes the item merging process when explosions generate large amounts of item drops",
 
   "carpet.rule.anvilWallProtection.name": "Anvil Wall Protection",
-  "carpet.rule.anvilWallProtection.desc": "Prevent anvils in an anvil wall from falling"
+  "carpet.rule.anvilWallProtection.desc": "Prevent anvils in an anvil wall from falling",
+
+  "carpet.rule.optimizeExplosion.name": "Explosion Optimization",
+  "carpet.rule.optimizeExplosion.desc": "Optimizes explosion ray calculations"
 }

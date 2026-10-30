@@ -1,3 +1,5 @@
+[English](README.md)
+
 # Carpet Trencher Addition
 
 这是一个为了方便运维炸沟机而制作的carpet拓展，添加了一些并不原版的功能，使用了AI辅助制作。

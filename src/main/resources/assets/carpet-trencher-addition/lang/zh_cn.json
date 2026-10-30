@@ -23,5 +23,8 @@
   "carpet.rule.optimizeExplosionItems.desc": "优化了爆炸生成大量掉落物时的合并流程",
 
   "carpet.rule.anvilWallProtection.name": "铁砧墙保护",
-  "carpet.rule.anvilWallProtection.desc": "阻止铁砧墙铁砧下落"
+  "carpet.rule.anvilWallProtection.desc": "阻止铁砧墙铁砧下落",
+
+  "carpet.rule.optimizeExplosion.name": "爆炸优化",
+  "carpet.rule.optimizeExplosion.desc": "优化了爆炸射线计算"
 }

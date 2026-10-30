@@ -49,4 +49,9 @@ public class CarpetTrencherAdditionSettings {
     )
     public static boolean anvilWallProtection = false;
 
+    @Rule(
+            categories = {CTA, TNT, OPTIMIZATION}
+    )
+    public static boolean optimizeExplosion = false;
+
 }

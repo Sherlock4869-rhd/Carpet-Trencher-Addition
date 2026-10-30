@@ -27,7 +27,6 @@ public final class ClientTntTickingManager {
         if (states == null) {
             return;
         }
-
         states.remove(uuid);
         if (states.isEmpty()) {
             WORLDS.remove(dimension);

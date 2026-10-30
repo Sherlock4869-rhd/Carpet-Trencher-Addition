@@ -20,10 +20,7 @@ public class FallingBlockMixin {
             cancellable = true
     )
     private void preventAnvilWallFall(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource, CallbackInfo ci) {
-        if (!CarpetTrencherAdditionSettings.anvilWallProtection) {
-            return;
-        }
-        if (FallingBlockHelper.shouldFalling(serverLevel, blockPos)) {
+        if (CarpetTrencherAdditionSettings.anvilWallProtection && FallingBlockHelper.shouldFalling(serverLevel, blockPos)) {
             ci.cancel();
         }
     }

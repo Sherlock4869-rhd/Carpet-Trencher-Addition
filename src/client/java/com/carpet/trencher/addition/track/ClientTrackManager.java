@@ -87,8 +87,8 @@ public class ClientTrackManager {
         return trackedEntities.get(uuid);
     }
 
-    public static Set<UUID> getTrackOrder() {
-        return Set.copyOf(trackOrder);
+    public static List<UUID> getTrackOrder() {
+        return List.copyOf(trackOrder);
     }
 
     public static boolean hasColor(UUID uuid) {
