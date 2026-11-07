@@ -1,7 +1,8 @@
 package com.carpet.trencher.addition.helper.ServerExposion;
 
-import com.carpet.trencher.addition.rules.optimizedTnt.LivingEntityPushCache;
-import com.carpet.trencher.addition.rules.optimizedTnt.TntPushCache;
+import com.carpet.trencher.addition.compat.TisCompat;
+import com.carpet.trencher.addition.rules.optimizeTnt.LivingEntityPushCache;
+import com.carpet.trencher.addition.rules.optimizeTnt.TntPushCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
@@ -10,6 +11,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
@@ -88,6 +91,8 @@ public final class ServerExplosionHelper {
             return;
         }
 
+        boolean tisWetExplosionEnabled = TisCompat.isWetExplosionReintroducedEnabled();
+
         Vec3 center = getExplosionCenter();
         float radius = this.radius * 2.0F;
         int x0 = Mth.floor(center.x - radius - 1.0);
@@ -97,9 +102,9 @@ public final class ServerExplosionHelper {
         int z0 = Mth.floor(center.z - radius - 1.0);
         int z1 = Mth.floor(center.z + radius + 1.0);
 
-        TntPushCache tntPushCache = new TntPushCache();
-        TntPushCache windChargePushCache = new TntPushCache();
-        LivingEntityPushCache livingEntityPushCache = new LivingEntityPushCache();
+        TntPushCache tntCache = new TntPushCache();
+        TntPushCache windChargeCache = new TntPushCache();
+        LivingEntityPushCache livingEntityCache = new LivingEntityPushCache();
 
         for (Entity entity : level.getEntities(this.source, new AABB( x0, y0, z0, x1, y1, z1))) {
 
@@ -107,23 +112,30 @@ public final class ServerExplosionHelper {
                 continue;
             }
 
-            double distance = Math.sqrt(entity.distanceToSqr(center)) / radius;
+            if (tisWetExplosionEnabled
+                    && this.source != null
+                    && this.source.isInWater()
+                    && (entity instanceof ItemEntity || entity instanceof ArmorStand || entity instanceof HangingEntity)) {
+                continue;
+            }
 
+            double distance = Math.sqrt(entity.distanceToSqr(center)) / radius;
             if (distance > 1.0) {
                 continue;
             }
 
             switch (entity) {
                 case PrimedTnt tnt ->
-                        optimizeTnt(tnt, distance, center, tntPushCache);
+                        optimizeTnt(tnt, distance, center, tntCache);
                 case AbstractWindCharge abstractWindCharge ->
-                        optimizeProjectile(abstractWindCharge, distance, center, windChargePushCache);
+                        optimizeProjectile(abstractWindCharge, distance, center, windChargeCache);
                 case LivingEntity livingEntity when !(entity instanceof Player) ->
-                        optimizeLivingEntity(livingEntity, distance, center, livingEntityPushCache);
+                        optimizeLivingEntity(livingEntity, distance, center, livingEntityCache);
                 default ->
                         optimizeEntity(entity, distance, center);
-            }
+                }
         }
+
     }
 
     private void optimizeTnt(PrimedTnt tnt, double distance, Vec3 center, TntPushCache tntPushCache) {
