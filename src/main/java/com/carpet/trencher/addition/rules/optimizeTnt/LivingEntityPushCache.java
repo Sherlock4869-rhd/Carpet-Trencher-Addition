@@ -1,4 +1,4 @@
-package com.carpet.trencher.addition.rules.optimizedTnt;
+package com.carpet.trencher.addition.rules.optimizeTnt;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
