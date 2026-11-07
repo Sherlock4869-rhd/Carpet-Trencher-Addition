@@ -1,5 +1,6 @@
 package com.carpet.trencher.addition.helper.ServerExposion;
 
+import carpet.CarpetSettings;
 import com.carpet.trencher.addition.compat.TisCompat;
 import com.carpet.trencher.addition.rules.optimizeTnt.LivingEntityPushCache;
 import com.carpet.trencher.addition.rules.optimizeTnt.TntPushCache;
@@ -116,6 +117,10 @@ public final class ServerExplosionHelper {
                     && this.source != null
                     && this.source.isInWater()
                     && (entity instanceof ItemEntity || entity instanceof ArmorStand || entity instanceof HangingEntity)) {
+                continue;
+            }
+
+            if (CarpetSettings.creativeNoClip && entity instanceof Player) {
                 continue;
             }
 
